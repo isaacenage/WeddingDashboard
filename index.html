@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Andrea & Isaac Wedding Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Parisienne&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+  @keyframes pulse-glow {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+  }
+  @font-face {
+  font-family: 'GitaLian';
+  src: url('./GitaLian.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+h1 {
+  font-family: 'GitaLian', cursive;
+}
+  .pulse {
+    animation: pulse-glow 1.2s ease-in-out infinite;
+  }
+  .page-section {
+    opacity: 0;
+    transform: translateY(100px);
+    transition: transform 0.4s ease, opacity 0.4s ease;
+    display: none;
+  }
+
+  .page-section.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .slide-up {
+    transform: translateY(-100px);
+  }
+
+  .slide-down {
+    transform: translateY(100px);
+  }
+body.login-bg {
+  position: relative;
+  background-color: #ffafcc;
+  overflow: hidden;
+}
+
+#bgVideo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: -1;
+  display: block;
+}
+
+body:not(.login-bg) #bgVideo {
+  display: none;
+}
+
+ .nav-wrapper {
+  position: relative;
+}
+.nav-highlight {
+  position: absolute;
+  background-color: #EC4899;
+  border-radius: 9999px;
+  height: 2.5rem;
+  width: calc(100% - 1rem);
+  transition: top 300ms ease;
+  z-index: 0;
+  left: 0.5rem;
+}
+.nav-link {
+  position: relative;
+  z-index: 1;
+  padding: 0.5rem 1rem;
+  border-radius: 1.5rem;
+  transition: background-color 300ms ease, color 300ms ease;
+  cursor:pointer;
+}
+    .nav-link.active {
+      color: white;
+    }
+    section.page-section {
+      display: none;
+    }
+    section.page-section.active {
+      display: block;
+    }
+    #loginWrapper {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+    }
+    .login-heading {
+      font-family: 'GitaLian', cursive;
+      font-size: 3rem;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    .login-subheading {
+      font-size: 1.25rem;
+      color: white;
+      margin-bottom: 2rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+    .calendar-day {
+  min-height: 100px;
+  border: 1px solid #f1c0e8;
+  padding: 0.5rem;
+  background-color: #fceaff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+.invisible {
+  visibility: hidden;
+}
+
+.task-pill {
+  display: block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: normal;
+  margin-top: 0.25rem;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  cursor: pointer;
+  color: white
+}
+
+  </style>
+</head>
+<!-- Filter Modal -->
+<div id="filterModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg p-6 w-full max-w-3xl shadow-lg">
+    <h3 class="text-xl font-bold mb-4 text-center">Filter Guest List</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <select id="filterTag" class="p-2 border rounded bg-white">
+        <option value="">All Guest Tags</option>
+      </select>
+      <select id="filterRSVP" class="p-2 border rounded bg-white">
+        <option value="">All RSVP Responses</option>
+        <option value="Attending">Attending</option>
+        <option value="Won't Attend">Won't Attend</option>
+        <option value="No Response">No Response</option>
+      </select>
+      <select id="filterTransport" class="p-2 border rounded bg-white">
+        <option value="">All Transport</option>
+        <option value="Van Rental">Van Rental</option>
+        <option value="Own Mode">Own Mode</option>
+      </select>
+      <select id="filterInvitation" class="p-2 border rounded bg-white">
+        <option value="">All Invitations</option>
+        <option value="Sent">Sent</option>
+        <option value="Not Sent">Not Sent</option>
+      </select>
+      <select id="filterAccommodation" class="p-2 border rounded bg-white">
+        <option value="">All Accommodations</option>
+      </select>
+    </div>
+    <div class="flex justify-between">
+      <button id="applyFilterBtn" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600">Apply Filter</button>
+      <button id="clearFilterBtn" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Clear Filters</button>
+    </div>
+  </div>
+</div>
+
+    <video autoplay muted loop playsinline id="bgVideo">
+  <source src="https://videos.pexels.com/video-files/8997516/8997516-hd_1920_1080_30fps.mp4" type="video/mp4" />
+</video>
+
+<body class="bg-[#FFE5EC] text-gray-800 login-bg" id="bodyRoot">
+  <div id="loginWrapper">
+    <h1 class="login-heading">Andrea&Isaac</h1>
+    <p class="login-subheading">Wedding Planner</p>
+    <div id="loginSection" class="p-8 max-w-md bg-white bg-opacity-80 text-black rounded-lg shadow-lg">
+      <h2 class="text-xl font-bold mb-4">Enter the Wedding Portal</h2>
+      <form id="loginForm" class="space-y-4">
+        <input type="email" id="email" placeholder="Email" class="w-full p-2 border rounded" required />
+        <input type="password" id="password" placeholder="Password" class="w-full p-2 border rounded" required />
+        <button type="submit" class="bg-pink-500 text-white px-4 py-2 rounded">Proceed</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Authenticated App Section -->
+<div id="appSection" style="display:none;" class="flex min-h-screen">
+  <aside class="w-64 bg-[#ffafcc] p-6 space-y-4 text-white">
+    <h1 class="text-2xl font-bold mb-4 text-center">Wedding Planner</h1>
+
+    <!-- Wrapped Nav with Highlight -->
+    <nav id="navLinks" class="nav-wrapper relative flex flex-col space-y-2 items-center">
+      <div id="navHighlight" class="nav-highlight"></div>
+      <a class="nav-link" data-page="setup">Setup</a>
+      <a class="nav-link" data-page="dashboard">Dashboard</a>
+      <a class="nav-link" data-page="timeline">Timeline</a>
+      <a class="nav-link" data-page="calendar">Calendar</a>
+      <a class="nav-link" data-page="checklist">Checklist</a>
+      <a class="nav-link" data-page="budget">Budget</a>
+      <a class="nav-link" data-page="vendors">Vendors</a>
+      <a class="nav-link" data-page="guestlist">Guest List</a>
+    </nav>
+  </aside>
+
+    <main class="flex-1 relative h-screen overflow-y-auto p-6">
+      <div class="flex justify-between items-center mb-4">
+        <p id="welcomeUser" class="text-sm text-gray-600"></p>
+        <button id="logoutBtn" class="bg-pink-400 text-white px-3 py-1 rounded text-sm">Logout</button>
+      </div>
+
+      <!-- Home Section -->
+      
+
+      <!-- Other sections -->
+      <section id="page-setup" class="page-section">
+  <h2 class="text-3xl font-bold mb-6">Setup</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div>
+      <label class="block font-semibold">Groom's Name</label>
+      <input id="groomName" type="text" class="w-full p-2 border rounded bg-white mt-1" />
+    </div>
+    <div>
+      <label class="block font-semibold">Bride's Name</label>
+      <input id="brideName" type="text" class="w-full p-2 border rounded bg-white mt-1" />
+    </div>
+    <div>
+      <label class="block font-semibold">Wedding Date</label>
+      <input id="weddingDate" type="date" class="w-full p-2 border rounded bg-white mt-1" />
+    </div>
+    <div>
+      <label class="block font-semibold">Wedding Venue</label>
+      <input id="weddingVenue" type="text" class="w-full p-2 border rounded bg-white mt-1" />
+    </div>
+    <div>
+      <label class="block font-semibold">Currency</label>
+      <select id="currency" class="w-full p-2 border rounded bg-white mt-1">
+        <option>₱</option>
+        <option>$</option>
+        <option>€</option>
+      </select>
+    </div>
+  </div>
+  <h3 class="text-xl font-bold mt-10 mb-2">Guest Tags & Accommodations</h3>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="block font-semibold">Guest Tags</label>
+      <div id="guestTagsContainer" class="flex flex-wrap items-center p-2 border rounded bg-white min-h-[4rem]"></div>
+      <input id="guestTagsInput" type="text" placeholder="Add tag(s)" class="mt-2 w-full p-2 border rounded bg-white" />
+    </div>
+    <div>
+      <label class="block font-semibold">Accommodations</label>
+      <div id="accommodationContainer" class="flex flex-wrap items-center p-2 border rounded bg-white min-h-[4rem]"></div>
+      <input id="accommodationInput" type="text" placeholder="Add accommodation(s)" class="mt-2 w-full p-2 border rounded bg-white" />
+    </div>
+  </div>
+</section>
+<section id="page-dashboard" class="page-section">
+
+<!-- Wedding Identity -->
+<div class="text-center text-4xl font-bold text-pink-600 mb-10">
+  <span id="groomDisplay">Groom</span>
+ <i class="fa fa-heart text-pink-500 mx-4" style="font-size: 2.5rem;"></i>
+  <span id="brideDisplay">Bride</span>
+</div>
+
+<!-- Wedding Date and Countdown -->
+<div class="flex flex-col md:flex-row justify-center gap-6 mb-10 text-center">
+  <div class="bg-white p-6 rounded-lg shadow-md w-full md:w-1/3">
+    <h3 class="text-xl font-semibold mb-2">Best Day Ever</h3>
+    <p id="weddingDateDisplay" class="text-lg text-gray-700">Not set</p>
+  </div>
+  <div class="bg-white p-6 rounded-lg shadow-md w-full md:w-1/3">
+    <h3 class="text-xl font-semibold mb-2">Countdown</h3>
+    <p id="countdown" class="text-2xl font-bold text-pink-600">Loading...</p>
+  </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+  <!-- Budget Overview -->
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <h3 class="text-xl font-semibold mb-2">Budget Overview</h3>
+    <p>Total Budget: <span id="totalBudget">₱0</span></p>
+    <p>Amount Spent: <span id="amountSpent">₱0</span></p>
+    <p>Remaining: <span id="remainingBudget">₱0</span></p>
+  </div>
+
+  <!-- Guest Summary -->
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <h3 class="text-xl font-semibold mb-2">Guest RSVP Summary</h3>
+    <p>Total Invited: <span id="totalGuests">0</span></p>
+    <p>RSVPs Received: <span id="rsvpsReceived">0</span></p>
+    <p>Pending RSVPs: <span id="pendingRsvps">0</span></p>
+  </div>
+
+  <!-- Vendor Status -->
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <h3 class="text-xl font-semibold mb-2">Vendor Status</h3>
+    <p>Confirmed: <span id="vendorsConfirmed">0</span></p>
+    <p>Pending: <span id="vendorsPending">0</span></p>
+  </div>
+</div>
+
+<!-- Task Progress -->
+<div class="bg-white p-6 rounded-lg shadow-md mb-10">
+  <h3 class="text-xl font-semibold mb-4">Task Completion</h3>
+  <p>Completed: <span id="tasksCompleted">0</span></p>
+  <p>Pending: <span id="tasksPending">0</span></p>
+  <div class="w-full bg-gray-200 rounded-full h-4 mt-2">
+    <div id="taskProgressBar" class="bg-pink-600 h-4 rounded-full transition-all duration-700" style="width: 0%;"></div>
+  </div>
+</div>
+
+      </section>
+      <section id="page-timeline" class="page-section">
+        <h2 class="text-3xl font-bold mb-6">Timeline & Tasks</h2>
+
+<div class="overflow-x-auto">
+  <table class="w-full table-auto bg-white shadow-md rounded-lg overflow-hidden">
+    <thead class="bg-pink-200 text-left">
+      <tr>
+        <th class="p-3">Date</th>
+        <th class="p-3">Task</th>
+        <th class="p-3">Assigned To</th>
+        <th class="p-3">Priority</th>
+        <th class="p-3">Done</th>
+        <th class="p-3">Delete</th>
+      </tr>
+    </thead>
+    <tbody id="taskTableBody">
+      <!-- Rows will be inserted here -->
+    </tbody>
+  </table>
+</div>
+
+<div class="mt-6">
+  <h3 class="text-xl font-semibold mb-2">Add New Task</h3>
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+    <input id="taskDate" type="date" class="p-2 border rounded bg-white" />
+    <input id="taskDesc" type="text" placeholder="Task description" class="p-2 border rounded bg-white" />
+    <select id="taskOwner" class="p-2 border rounded bg-white">
+      <option>Isaac</option>
+      <option>Andrea</option>
+    </select>
+    <select id="taskPriority" class="p-2 border rounded bg-white">
+      <option>Low</option>
+      <option>Medium</option>
+      <option>High</option>
+    </select>
+    <button onclick="addTask()" class="bg-[#EC4899] text-white px-4 py-2 rounded">Add</button>
+  </div>
+</div>
+      </section>
+      <section id="page-calendar" class="page-section">
+        <h2 class="text-3xl font-bold mb-6">Calendar View</h2>
+
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-6 space-y-4 md:space-y-0">
+  <div class="flex items-center space-x-2">
+    <button id="prevMonth" class="px-3 py-1 bg-pink-300 text-white rounded">←</button>
+    <span id="monthYear" class="text-lg font-semibold"></span>
+    <button id="nextMonth" class="px-3 py-1 bg-pink-300 text-white rounded">→</button>
+    <select id="yearSelect" class="ml-4 p-1 border rounded"></select>
+    <select id="filterOwner" class="p-1 border rounded">
+      <option value="">All Owners</option>
+      <option value="Isaac">Isaac</option>
+      <option value="Andrea">Andrea</option>
+    </select>
+    <select id="filterPriority" class="p-1 border rounded">
+      <option value="">All Priorities</option>
+      <option value="Low">Low</option>
+      <option value="Medium">Medium</option>
+      <option value="High">High</option>
+    </select>
+  </div>
+</div>
+
+<div id="calendar" class="grid grid-cols-7 gap-2"></div>
+
+      </section>
+      <section id="page-checklist" class="page-section">
+        <h2 class="text-3xl font-bold mb-6">Checklist</h2>
+<div id="checklistContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+</section>
+
+      <section id="page-budget" class="page-section">
+     <h2 class="text-3xl font-bold mb-6">Wedding Budget Planner</h2>
+
+<!-- Budget Contribution -->
+<section class="bg-white p-6 rounded-lg shadow mb-8">
+  <h3 class="text-xl font-semibold mb-4">Wedding Budget Contribution</h3>
+  <div id="contributionList" class="space-y-2 mb-4"></div>
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+    <input id="contributorName" placeholder="Name" class="p-2 border rounded bg-white" />
+    <input id="contributionAmount" type="number" placeholder="Amount" class="p-2 border rounded bg-white" />
+    <button onclick="addContributor()" class="bg-pink-500 text-white px-4 py-2 rounded col-span-1 hover:bg-pink-600">Add</button>
+  </div>
+</section>
+
+<!-- Total Wedding Budget Summary -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 text-center">
+  <div class="bg-[#ffc8dd] p-4 rounded-lg shadow">
+    <h4 class="font-semibold">Wedding Budget</h4>
+    <p id="weddingBudgetTotal" class="text-2xl font-bold text-pink-600">₱0</p>
+  </div>
+  <div class="bg-white p-4 rounded-lg shadow">
+    <h4 class="font-semibold">Total Paid</h4>
+    <p id="budgetPaid" class="text-2xl font-bold text-green-600">₱0</p>
+  </div>
+  <div class="bg-white p-4 rounded-lg shadow">
+    <h4 class="font-semibold">Left to Pay</h4>
+    <p id="budgetLeftToPay" class="text-2xl font-bold text-red-500">₱0</p>
+  </div>
+  <div class="bg-white p-4 rounded-lg shadow">
+    <h4 class="font-semibold">Wedding Budget Left</h4>
+    <p id="budgetLeftFromBudget" class="text-2xl font-bold text-purple-600">₱0</p>
+  </div>
+</div>
+
+<!-- Expense Tracker Table -->
+<section class="bg-white p-6 rounded-lg shadow mb-10">
+  <h3 class="text-xl font-semibold mb-4">Expense Tracker</h3>
+  <table class="w-full table-auto mb-4">
+    <thead class="bg-pink-200">
+      <tr>
+        <th class="p-2">Date</th>
+        <th class="p-2">Vendor Type</th>
+        <th class="p-2">Vendor Name</th>
+        <th class="p-2">Paid By</th>
+        <th class="p-2 text-right">Contract Price</th>
+        <th class="p-2 text-right">Amount Paid</th>
+        <th class="p-2 text-right">Balance</th>
+        <th class="p-2 text-center">Delete</th>
+      </tr>
+    </thead>
+    <tbody id="expenseTableBody"></tbody>
+  </table>
+
+  <!-- Add Expense Inputs -->
+  <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
+    <input id="expenseDate" type="date" class="p-2 border rounded bg-white" />
+    
+    <!-- Populated from Setup Accommodations -->
+    <select id="expenseVendorType" class="p-2 border rounded bg-white">
+      <option value="">Select Vendor Type</option>
+    </select>
+
+    <input id="expenseVendor" placeholder="Vendor Name" class="p-2 border rounded bg-white" />
+
+    <select id="expensePaidBy" class="p-2 border rounded bg-white">
+      <option value="Isaac">Isaac</option>
+      <option value="Andrea">Andrea</option>
+      <option value="Both">Both</option>
+    </select>
+
+    <input id="expenseContract" type="number" placeholder="Contract Price" class="p-2 border rounded bg-white" />
+    <input id="expensePaid" type="number" placeholder="Amount Paid" class="p-2 border rounded bg-white" />
+
+    <button onclick="addExpense()" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600">Add</button>
+  </div>
+</section>
+      </section>
+      <section id="page-vendors" class="page-section">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- Summary (Left Column) -->
+  <div class="bg-white p-4 rounded shadow col-span-1">
+    <h2 class="text-xl font-bold mb-4 text-center">Summary</h2>
+    <table class="w-full table-auto text-sm">
+      <thead class="bg-pink-200">
+        <tr>
+          <th class="p-2 text-left">Vendor Type</th>
+          <th class="p-2 text-right">Amount</th>
+        </tr>
+      </thead>
+      <tbody id="vendorSummaryBody">
+        <!-- Rows will be dynamically generated -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Vendor Detail (Right Column) -->
+  <div class="bg-white p-4 rounded shadow col-span-2">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold">Vendors</h2>
+      <select id="vendorTypeFilter" class="p-2 border rounded bg-white">
+        <option value="">Select Vendor Type</option>
+        <!-- Options auto-generated from Summary -->
+      </select>
+    </div>
+
+    <div id="vendorTableContainer">
+      <!-- Vendor table dynamically shown here based on filter -->
+    </div>
+  </div>
+</div>
+
+      </section>
+      <section id="page-guestlist" class="page-section">
+<!-- Summary Metrics -->
+<div class="p-6">
+  <h2 class="text-3xl font-bold mb-6">Guest List</h2>
+
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+    <button id="filterGuestListBtn" class="bg-[#9b6a6c] text-white px-4 py-2 rounded col-span-1">Filter Guest List</button>
+    <div class="bg-pink-100 text-center p-4 rounded">
+      <p class="text-sm font-medium">TOTAL GUEST</p>
+      <p id="totalGuest" class="text-2xl font-bold">0</p>
+    </div>
+    <div class="bg-pink-100 text-center p-4 rounded">
+      <p class="text-sm font-medium">TOTAL INVITATION SENT</p>
+      <p id="totalInvSent" class="text-2xl font-bold">0</p>
+    </div>
+    <div class="bg-pink-100 text-center p-4 rounded">
+      <p class="text-sm font-medium">TOTAL CONFIRMED GUEST</p>
+      <p id="totalConfirmed" class="text-2xl font-bold">0</p>
+    </div>
+    <div class="bg-pink-100 text-center p-4 rounded">
+      <p class="text-sm font-medium">PAX FOR HOTEL</p>
+      <p id="totalHotel" class="text-2xl font-bold">0</p>
+    </div>
+    <div class="bg-pink-100 text-center p-4 rounded">
+      <p class="text-sm font-medium">PAX FOR TRANSPORT</p>
+      <p id="totalTransport" class="text-2xl font-bold">0</p>
+    </div>
+  </div>
+
+  <!-- Editable Table -->
+  <div class="overflow-x-auto">
+    <table class="table-auto w-full border border-gray-300 text-sm bg-white">
+      <thead class="bg-[#d9a5a7] text-white uppercase">
+        <tr>
+          <th class="p-2 border">#</th>
+          <th class="p-2 border">Guest Name</th>
+          <th class="p-2 border">Guest Tag</th>
+          <th class="p-2 border">Invitation</th>
+          <th class="p-2 border">RSVP Response</th>
+          <th class="p-2 border">Accommodations</th>
+          <th class="p-2 border">Transport</th>
+          <th class="p-2 border">Address</th>
+          <th class="p-2 border">Phone Number</th>
+          <th class="p-2 border">Email Address</th>
+          <th class="p-2 border">Delete</th>
+        </tr>
+      </thead>
+      <tbody id="guestTableBody">
+        <!-- JS will render rows -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add New Guest -->
+  <div class="mt-6">
+    <h3 class="text-lg font-semibold mb-2">Add New Guest</h3>
+    <button id="addGuestBtn" class="bg-[#EC4899] text-white px-4 py-2 rounded">Add Row</button>
+  </div>
+</div>
+
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBviwMdDCPO1UUovvdEwBjqcSM9qb6rxCA",
+      authDomain: "andreaisaacwedding.firebaseapp.com",
+      databaseURL: "https://andreaisaacwedding-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "andreaisaacwedding",
+      storageBucket: "andreaisaacwedding.appspot.com",
+      messagingSenderId: "759825528019",
+      appId: "1:759825528019:web:c15e084ff9dcefbca345026",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(userCredential => {
+          document.getElementById("loginWrapper").style.display = "none";
+          document.getElementById("appSection").style.display = "flex";
+          document.getElementById("bodyRoot").classList.remove("login-bg");
+const email = userCredential.user.email;
+const resolvedName = email === "ivenage@gmail.com" ? "Isaac" : email === "andreaverissacs@gmail.com" ? "Andrea" : email;
+          document.getElementById("welcomeUser").textContent = `Logged in as ${resolvedName}`;
+          sessionStorage.setItem("displayName", resolvedName);
+        })
+.catch(err => {
+  const alertBox = document.getElementById("customAlert");
+  const closeBtn = document.getElementById("closeAlert");
+  alertBox.classList.remove("hidden");
+  closeBtn.onclick = () => alertBox.classList.add("hidden");
+});
+
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", function() {
+      auth.signOut().then(() => location.reload());
+    });
+
+    auth.onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById("loginWrapper").style.display = "none";
+    document.getElementById("appSection").style.display = "flex";
+    document.getElementById("bodyRoot").classList.remove("login-bg");
+    const savedName =
+      user.email === "ivenage@gmail.com" ? "Isaac" :
+      user.email === "andreaverissacs@gmail.com" ? "Andrea" :
+      user.email;
+    document.getElementById("welcomeUser").textContent = `Logged in as ${savedName}`;
+    sessionStorage.setItem('displayName', savedName);
+
+    const lastPage = localStorage.getItem('lastPage') || 'setup';
+    document.querySelectorAll('.page-section').forEach(section => section.classList.remove('active'));
+    document.getElementById(`page-${lastPage}`)?.classList.add("active");
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    document.querySelector(`.nav-link[data-page="${lastPage}"]`)?.classList.add("active");
+   
+  import('./main.js').then(module => {
+      module.initSetupFormSync(user);
+      module.initDashboardView(user);
+      module.initTimelineTasks(user);
+      module.initCalendar(user);
+      module.initChecklistModule(user);
+      module.initBudgetModule(user); 
+      module.initVendorsModule(user);
+      module.initGuestListModule(user);
+      module.refreshNavHighlight();
+    });
+  }
+});
+
+const navLinks = document.querySelectorAll('.nav-link');
+let currentPageIndex = 0;
+const pageOrder = Array.from(navLinks).map(link => link.dataset.page);
+
+navLinks.forEach((link, index) => {
+  link.addEventListener('click', () => {
+    const newPage = link.dataset.page;
+    const newPageEl = document.getElementById(`page-${newPage}`);
+    const oldPageEl = document.querySelector('.page-section.active');
+
+    // Handle nav highlight
+    navLinks.forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
+    localStorage.setItem('lastPage', newPage);
+
+    if (oldPageEl && oldPageEl !== newPageEl) {
+      oldPageEl.classList.remove('active');
+      oldPageEl.style.display = 'none';
+    }
+
+    if (newPageEl) {
+      // Determine direction
+      const newIndex = index;
+      const direction = newIndex > currentPageIndex ? 'slide-down' : 'slide-up';
+      newPageEl.classList.remove('slide-up', 'slide-down');
+      newPageEl.classList.add(direction);
+
+      newPageEl.style.display = 'block';
+      void newPageEl.offsetWidth; // trigger reflow
+      newPageEl.classList.add('active');
+
+      currentPageIndex = newIndex;
+    }
+  });
+});
+  </script>
+
+  <div id="customAlert" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+  <div class="bg-red-600 text-white p-6 rounded-lg shadow-lg w-80 text-center">
+    <p class="font-semibold mb-4 pulse">You're neither Isaac nor Andrea.<br>This love story doesn't include you.
+<br>Go find your fiancé first.</p>
+    <button id="closeAlert" class="bg-white text-red-600 font-bold px-4 py-1 rounded hover:bg-red-100">OK</button>
+  </div>
+</div>
+
+
+</body>
+</html>
