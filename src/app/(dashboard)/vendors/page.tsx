@@ -120,18 +120,17 @@ export default function VendorsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFE5EC] p-6">
-      <div className="max-w-7xl mx-auto">
-
+    <div className="min-h-screen bg-[#FFE5EC] p-4 sm:p-6">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Two-column layout for Masterlist and Selected Vendors */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Vendor Masterlist */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold text-gray-800">Vendor Masterlist</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-[#EC4899]">Vendor Masterlist</h2>
               <button
                 onClick={() => setIsMasterlistOpen(!isMasterlistOpen)}
-                className="flex items-center gap-2 text-pink-600 hover:text-pink-700"
+                className="flex items-center gap-2 text-[#EC4899] hover:text-pink-700"
               >
                 {isMasterlistOpen ? 'Hide' : 'Show'} Masterlist
                 <svg
@@ -151,66 +150,66 @@ export default function VendorsPage() {
                 <form onSubmit={handleAddVendor} className="mb-6 space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Vendor Name</label>
+                      <label className="block text-sm font-medium text-[#EC4899] mb-1">Vendor Name</label>
                       <input
                         type="text"
                         value={newVendor.name}
                         onChange={(e) => setNewVendor(prev => ({ ...prev, name: e.target.value }))}
-                        className="w-full p-2 border border-gray-300 rounded-md"
+                        className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39] placeholder-[#EC4899]/70"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Service Type</label>
+                      <label className="block text-sm font-medium text-[#EC4899] mb-1">Service Type</label>
                       <select
                         value={newVendor.serviceType}
                         onChange={(e) => setNewVendor(prev => ({ ...prev, serviceType: e.target.value }))}
-                        className="w-full p-2 border border-gray-300 rounded-md"
+                        className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39]"
                         required
                       >
-                        <option value="">Select Type</option>
+                        <option value="" className="text-[#EC4899]/70">Select Type</option>
                         {serviceTypes.map(type => (
                           <option key={type} value={type}>{type}</option>
                         ))}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                      <label className="block text-sm font-medium text-[#EC4899] mb-1">Contact Number</label>
                       <input
                         type="tel"
                         value={newVendor.contactNumber}
                         onChange={(e) => setNewVendor(prev => ({ ...prev, contactNumber: e.target.value }))}
-                        className="w-full p-2 border border-gray-300 rounded-md"
+                        className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39] placeholder-[#EC4899]/70"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <label className="block text-sm font-medium text-[#EC4899] mb-1">Email</label>
                       <input
                         type="email"
                         value={newVendor.email}
                         onChange={(e) => setNewVendor(prev => ({ ...prev, email: e.target.value }))}
-                        className="w-full p-2 border border-gray-300 rounded-md"
+                        className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39] placeholder-[#EC4899]/70"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Package Name</label>
+                      <label className="block text-sm font-medium text-[#EC4899] mb-1">Package Name</label>
                       <input
                         type="text"
                         value={newVendor.packageName}
                         onChange={(e) => setNewVendor(prev => ({ ...prev, packageName: e.target.value }))}
-                        className="w-full p-2 border border-gray-300 rounded-md"
+                        className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39] placeholder-[#EC4899]/70"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Contract Price (₱)</label>
+                      <label className="block text-sm font-medium text-[#EC4899] mb-1">Contract Price (₱)</label>
                       <input
                         type="number"
                         value={newVendor.contractPrice}
                         onChange={(e) => setNewVendor(prev => ({ ...prev, contractPrice: parseFloat(e.target.value) }))}
-                        className="w-full p-2 border border-gray-300 rounded-md"
+                        className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39] placeholder-[#EC4899]/70"
                         required
                         min="0"
                         step="0.01"
@@ -219,7 +218,7 @@ export default function VendorsPage() {
                   </div>
                   <button
                     type="submit"
-                    className="w-full bg-pink-500 text-white py-2 rounded-md hover:bg-pink-600 transition-colors"
+                    className="w-full bg-[#EC4899] text-white px-4 py-2 sm:py-3 rounded-lg hover:bg-pink-600 active:scale-95 transition-all text-sm font-medium shadow-lg hover:shadow-xl"
                   >
                     Add Vendor
                   </button>
@@ -229,30 +228,30 @@ export default function VendorsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="bg-gray-50">
-                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Service Type</th>
-                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Vendor Name</th>
-                        <th className="px-4 py-2 text-right text-sm font-medium text-gray-500">Contract Price</th>
-                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Contact Info</th>
-                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Email</th>
-                        <th className="px-4 py-2 text-center text-sm font-medium text-gray-500">Status</th>
+                      <tr className="bg-white/50">
+                        <th className="px-2 sm:px-3 py-2 text-left text-xs sm:text-sm font-medium text-[#EC4899]">Service Type</th>
+                        <th className="px-2 sm:px-3 py-2 text-left text-xs sm:text-sm font-medium text-[#EC4899]">Vendor Name</th>
+                        <th className="px-2 sm:px-3 py-2 text-right text-xs sm:text-sm font-medium text-[#EC4899]">Contract Price</th>
+                        <th className="px-2 sm:px-3 py-2 text-left text-xs sm:text-sm font-medium text-[#EC4899]">Contact Info</th>
+                        <th className="px-2 sm:px-3 py-2 text-left text-xs sm:text-sm font-medium text-[#EC4899]">Email</th>
+                        <th className="px-2 sm:px-3 py-2 text-center text-xs sm:text-sm font-medium text-[#EC4899]">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
+                    <tbody className="divide-y divide-white/50">
                       {vendors.map(vendor => {
                         const isSelected = selectedVendors[vendor.serviceType] === vendor.id;
                         return (
-                          <tr key={vendor.id} className={`hover:bg-gray-50 ${isSelected ? 'bg-green-50' : ''}`}>
-                            <td className="px-4 py-3 text-sm text-gray-900">{vendor.serviceType}</td>
-                            <td className="px-4 py-3 text-sm text-gray-900">{vendor.name}</td>
-                            <td className="px-4 py-3 text-sm text-gray-900 text-right">
+                          <tr key={vendor.id} className={`hover:bg-white/30 transition-colors ${isSelected ? 'bg-white/50' : ''}`}>
+                            <td className="px-2 sm:px-3 py-3 text-xs sm:text-sm text-[#4a1d39]">{vendor.serviceType}</td>
+                            <td className="px-2 sm:px-3 py-3 text-xs sm:text-sm text-[#4a1d39]">{vendor.name}</td>
+                            <td className="px-2 sm:px-3 py-3 text-xs sm:text-sm text-[#4a1d39] text-right">
                               ₱{vendor.contractPrice.toLocaleString()}
                             </td>
-                            <td className="px-4 py-3 text-sm text-gray-900">{vendor.contactNumber}</td>
-                            <td className="px-4 py-3 text-sm text-gray-900">{vendor.email}</td>
-                            <td className="px-4 py-3 text-sm text-center">
+                            <td className="px-2 sm:px-3 py-3 text-xs sm:text-sm text-[#4a1d39]">{vendor.contactNumber}</td>
+                            <td className="px-2 sm:px-3 py-3 text-xs sm:text-sm text-[#4a1d39]">{vendor.email}</td>
+                            <td className="px-2 sm:px-3 py-3 text-xs sm:text-sm text-center">
                               {isSelected && (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#EC4899]/10 text-[#EC4899]">
                                   Selected
                                 </span>
                               )}
@@ -268,12 +267,12 @@ export default function VendorsPage() {
           </div>
 
           {/* Selected Vendors Summary */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold text-gray-800">Selected Vendors</h2>
+              <h2 className="text-xl sm:text-2xl font-semibold text-[#EC4899]">Selected Vendors</h2>
               <button
                 onClick={() => setIsSummaryOpen(!isSummaryOpen)}
-                className="flex items-center gap-2 text-pink-600 hover:text-pink-700"
+                className="flex items-center gap-2 text-[#EC4899] hover:text-pink-700"
               >
                 {isSummaryOpen ? 'Hide' : 'Show'} Selected Vendors
                 <svg
@@ -297,7 +296,7 @@ export default function VendorsPage() {
         </div>
 
         {/* Vendor Groups */}
-        <div className="space-y-8">
+        <div className="space-y-4 sm:space-y-6">
           {getVendorGroups().map(group => (
             <VendorGroup
               key={group.serviceType}

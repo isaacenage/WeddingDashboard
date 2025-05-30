@@ -221,52 +221,52 @@ export default function BudgetPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFE5EC] p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#FFE5EC] p-4 sm:p-6">
+      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Wedding Budget</h3>
-            <p className="text-2xl font-semibold text-gray-800">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-[#EC4899] mb-2">Wedding Budget</h3>
+            <p className="text-xl sm:text-2xl font-bold text-[#4a1d39]">
               ₱{calculateTotalBudget().toLocaleString()}
             </p>
           </div>
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Total Paid</h3>
-            <p className="text-2xl font-semibold text-gray-800">
+          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-[#EC4899] mb-2">Total Paid</h3>
+            <p className="text-xl sm:text-2xl font-bold text-[#4a1d39]">
               ₱{calculateTotalPaid().toLocaleString()}
             </p>
           </div>
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Left to Pay</h3>
-            <p className="text-2xl font-semibold text-gray-800">
+          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-[#EC4899] mb-2">Left to Pay</h3>
+            <p className="text-xl sm:text-2xl font-bold text-[#4a1d39]">
               ₱{calculateLeftToPay().toLocaleString()}
             </p>
           </div>
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Budget Left</h3>
-            <p className="text-2xl font-semibold text-gray-800">
+          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-[#EC4899] mb-2">Budget Left</h3>
+            <p className="text-xl sm:text-2xl font-bold text-[#4a1d39]">
               ₱{calculateBudgetLeft().toLocaleString()}
             </p>
           </div>
         </div>
 
         {/* Personal Breakdown */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {(['Andrea', 'Isaac'] as const).map(person => {
             const { promised, spent, remaining } = calculatePersonalBreakdown(person);
             return (
-              <div key={person} className="bg-white rounded-lg shadow-lg p-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">{person}</h3>
-                <div className="space-y-2">
-                  <p className="text-gray-600">
+              <div key={person} className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-[#EC4899] mb-4">{person}</h3>
+                <div className="space-y-3">
+                  <p className="text-sm sm:text-base text-[#4a1d39]">
                     Promised: <span className="font-semibold">₱{promised.toLocaleString()}</span>
                   </p>
-                  <p className="text-gray-600">
+                  <p className="text-sm sm:text-base text-[#4a1d39]">
                     Spent: <span className="font-semibold">₱{spent.toLocaleString()}</span>
                   </p>
-                  <p className="text-gray-600">
+                  <p className="text-sm sm:text-base text-[#4a1d39]">
                     Remaining: <span className="font-semibold">₱{remaining.toLocaleString()}</span>
                   </p>
                 </div>
@@ -275,27 +275,27 @@ export default function BudgetPage() {
           })}
         </div>
 
-        {/* Contributions Table */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Budget Contributions</h2>
+        {/* Contributions Section */}
+        <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
+          <h2 className="text-xl sm:text-2xl font-semibold text-[#EC4899] mb-4">Budget Contributions</h2>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-gray-50">
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Name</th>
-                  <th className="px-4 py-2 text-right text-sm font-medium text-gray-500">Amount</th>
+                <tr className="bg-white/50">
+                  <th className="px-3 sm:px-4 py-2 text-left text-xs sm:text-sm font-medium text-[#EC4899]">Name</th>
+                  <th className="px-3 sm:px-4 py-2 text-right text-xs sm:text-sm font-medium text-[#EC4899]">Amount</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-white/50">
                 {contributions.map(contribution => (
-                  <tr key={contribution.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">{contribution.name}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900 text-right">
+                  <tr key={contribution.id} className="hover:bg-white/30 transition-colors">
+                    <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39]">{contribution.name}</td>
+                    <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39] text-right">
                       <input
                         type="number"
                         value={contribution.amount}
                         onChange={(e) => handleContributionUpdate(contribution.id, parseFloat(e.target.value))}
-                        className="w-32 text-right p-1 border border-gray-300 rounded"
+                        className="w-full sm:w-32 text-right p-1.5 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-[#4a1d39] placeholder-[#EC4899]/70"
                       />
                     </td>
                   </tr>
@@ -305,13 +305,13 @@ export default function BudgetPage() {
           </div>
 
           {/* Add Contribution Form */}
-          <form onSubmit={handleContributionSubmit} className="mt-4 flex gap-4">
+          <form onSubmit={handleContributionSubmit} className="mt-4 flex flex-col sm:flex-row gap-3">
             <input
               type="text"
               value={newContribution.name}
               onChange={(e) => setNewContribution(prev => ({ ...prev, name: e.target.value }))}
               placeholder="Name"
-              className="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="flex-1 p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39] placeholder-[#EC4899]/70"
               required
             />
             <input
@@ -319,14 +319,14 @@ export default function BudgetPage() {
               value={newContribution.amount}
               onChange={(e) => setNewContribution(prev => ({ ...prev, amount: e.target.value }))}
               placeholder="Amount"
-              className="w-32 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="w-full sm:w-32 p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39] placeholder-[#EC4899]/70"
               required
               min="0"
               step="0.01"
             />
             <button
               type="submit"
-              className="bg-pink-500 text-white px-4 py-2 rounded-md hover:bg-pink-600 transition-colors"
+              className="bg-[#EC4899] text-white px-4 py-2 sm:py-3 rounded-lg hover:bg-pink-600 active:scale-95 transition-all text-sm font-medium shadow-lg hover:shadow-xl"
             >
               Add
             </button>
@@ -334,169 +334,97 @@ export default function BudgetPage() {
         </div>
 
         {/* Expense Form */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Add Expense</h2>
+        <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
+          <h2 className="text-xl sm:text-2xl font-semibold text-[#EC4899] mb-4">Add Expense</h2>
           <form onSubmit={handleExpenseSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Vendor Type
-                </label>
+                <label className="block text-sm font-medium text-[#EC4899] mb-1">Vendor Type</label>
                 <select
                   value={selectedVendorType}
                   onChange={(e) => handleVendorTypeChange(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39]"
                   required
                 >
-                  <option value="">Select Vendor Type</option>
+                  <option value="" className="text-[#EC4899]/70">Select Type</option>
                   {getVendorTypes().map(type => (
                     <option key={type} value={type}>{type}</option>
                   ))}
                 </select>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Vendor Name
-                </label>
+                <label className="block text-sm font-medium text-[#EC4899] mb-1">Vendor</label>
                 <select
-                  value={newExpense.vendor}
+                  value={selectedVendor?.id || ''}
                   onChange={(e) => handleVendorChange(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39]"
                   required
                   disabled={!selectedVendorType}
                 >
-                  <option value="">Select Vendor</option>
+                  <option value="" className="text-[#EC4899]/70">Select Vendor</option>
                   {getVendorsByType(selectedVendorType).map(vendor => (
                     <option key={vendor.id} value={vendor.id}>{vendor.name}</option>
                   ))}
                 </select>
               </div>
+            </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Payment Amount
-                </label>
+                <label className="block text-sm font-medium text-[#EC4899] mb-1">Amount</label>
                 <input
                   type="number"
                   value={newExpense.amount}
                   onChange={(e) => setNewExpense(prev => ({ ...prev, amount: e.target.value }))}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39] placeholder-[#EC4899]/70"
                   required
                   min="0"
                   step="0.01"
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Paid By
-                </label>
+                <label className="block text-sm font-medium text-[#EC4899] mb-1">Date</label>
+                <input
+                  type="date"
+                  value={newExpense.date}
+                  onChange={(e) => setNewExpense(prev => ({ ...prev, date: e.target.value }))}
+                  className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39]"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-[#EC4899] mb-1">Paid By</label>
                 <select
                   value={newExpense.paidBy}
                   onChange={(e) => setNewExpense(prev => ({ ...prev, paidBy: e.target.value as 'Andrea' | 'Isaac' }))}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39]"
                   required
                 >
                   <option value="Andrea">Andrea</option>
                   <option value="Isaac">Isaac</option>
                 </select>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Payment Date
-                </label>
+                <label className="block text-sm font-medium text-[#EC4899] mb-1">Notes</label>
                 <input
-                  type="date"
-                  value={newExpense.date}
-                  onChange={(e) => setNewExpense(prev => ({ ...prev, date: e.target.value }))}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
-                  required
+                  type="text"
+                  value={newExpense.notes}
+                  onChange={(e) => setNewExpense(prev => ({ ...prev, notes: e.target.value }))}
+                  className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39] placeholder-[#EC4899]/70"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Notes
-              </label>
-              <input
-                type="text"
-                value={newExpense.notes}
-                onChange={(e) => setNewExpense(prev => ({ ...prev, notes: e.target.value }))}
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
-                placeholder="Optional"
-              />
-            </div>
-
             <button
               type="submit"
-              className="w-full bg-pink-500 text-white py-2 rounded-md hover:bg-pink-600 transition-colors"
+              className="w-full bg-[#EC4899] text-white px-4 py-2 sm:py-3 rounded-lg hover:bg-pink-600 active:scale-95 transition-all text-sm font-medium shadow-lg hover:shadow-xl"
             >
-              Add Payment
+              Add Expense
             </button>
           </form>
-        </div>
-
-        {/* Expense List */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Payment History</h2>
-          {expenses.length === 0 ? (
-            <p className="text-gray-500 italic">No payments recorded yet</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Date</th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Vendor</th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Type</th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Contract Price</th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Paid By</th>
-                    <th className="px-4 py-2 text-right text-sm font-medium text-gray-500">Amount</th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Notes</th>
-                    <th className="px-4 py-2 text-center text-sm font-medium text-gray-500">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {expenses.map(expense => {
-                    const vendor = vendors.find(v => v.id === expense.vendor);
-                    const vendorTotalPaid = expenses
-                      .filter(e => e.vendor === expense.vendor)
-                      .reduce((sum, e) => sum + e.amount, 0);
-                    const balance = vendor ? vendor.contractPrice - vendorTotalPaid : 0;
-
-                    return (
-                      <tr key={expense.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm text-gray-900">
-                          {new Date(expense.date).toLocaleDateString()}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{vendor?.name || 'Unknown'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{expense.vendorType}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">
-                          ₱{vendor?.contractPrice.toLocaleString() || '0'}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{expense.paidBy}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                          ₱{(expense.amount || 0).toLocaleString()}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{expense.notes || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-center">
-                          <button
-                            onClick={() => handleDeleteExpense(expense.id)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
         </div>
       </div>
     </div>

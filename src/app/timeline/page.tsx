@@ -96,37 +96,38 @@ export default function TimelinePage() {
 
   return (
     <ProtectedRoute>
-      <div className="space-y-6">
-        <h1 className="text-3xl font-gitalian">Wedding Tasks</h1>
+      <div className="min-h-screen bg-[#FFE5EC] p-4 sm:p-6">
+        <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#EC4899]">Wedding Tasks</h1>
 
         {/* Add Task Form */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Add New Task</h2>
+          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-semibold text-[#EC4899] mb-4">Add New Task</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Date</label>
+                <label className="block text-sm font-medium text-[#EC4899] mb-1">Date</label>
               <input
                 type="date"
                 value={newTask.date}
                 onChange={(e) => setNewTask({ ...newTask, date: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                  className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39]"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Description</label>
+                <label className="block text-sm font-medium text-[#EC4899] mb-1">Description</label>
               <input
                 type="text"
                 value={newTask.description}
                 onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                  className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39] placeholder-[#EC4899]/70"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Assigned To</label>
+                <label className="block text-sm font-medium text-[#EC4899] mb-1">Assigned To</label>
               <select
                 value={newTask.owner}
                 onChange={(e) => handleOwnerChange(e.target.value as Owner)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                  className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39]"
               >
                 <option value="Isaac">Isaac</option>
                 <option value="Andrea">Andrea</option>
@@ -134,11 +135,11 @@ export default function TimelinePage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Priority</label>
+                <label className="block text-sm font-medium text-[#EC4899] mb-1">Priority</label>
               <select
                 value={newTask.priority}
                 onChange={(e) => handlePriorityChange(e.target.value as Priority)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                  className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39]"
               >
                 <option value="Low">Low</option>
                 <option value="Medium">Medium</option>
@@ -149,7 +150,7 @@ export default function TimelinePage() {
           <div className="mt-4 flex justify-end">
             <button
               onClick={handleAddTask}
-              className="px-4 py-2 text-sm font-medium text-white bg-pink-500 rounded-md hover:bg-pink-600"
+                className="px-4 py-2 sm:py-3 rounded-lg bg-[#EC4899] text-white hover:bg-pink-600 active:scale-95 transition-all text-sm font-medium shadow-lg hover:shadow-xl"
             >
               Add Task
             </button>
@@ -157,13 +158,14 @@ export default function TimelinePage() {
         </div>
 
         {/* Filter Dropdowns */}
-        <div className="bg-white p-4 rounded-lg shadow flex space-x-4">
+          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Filter Owner:</label>
+                <label className="block text-sm font-medium text-[#EC4899] mb-1">Filter Owner:</label>
             <select
               value={filterOwner}
               onChange={(e) => setFilterOwner(e.target.value as Owner | 'All')}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                  className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39]"
             >
               <option value="All">All</option>
               <option value="Isaac">Isaac</option>
@@ -172,11 +174,11 @@ export default function TimelinePage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Filter Priority:</label>
+                <label className="block text-sm font-medium text-[#EC4899] mb-1">Filter Priority:</label>
             <select
               value={filterPriority}
               onChange={(e) => setFilterPriority(e.target.value as Priority | 'All')}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                  className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39]"
             >
               <option value="All">All</option>
               <option value="Low">Low</option>
@@ -185,62 +187,64 @@ export default function TimelinePage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Filter Status:</label>
+                <label className="block text-sm font-medium text-[#EC4899] mb-1">Filter Status:</label>
             <select
               value={filterCompleted}
               onChange={(e) => setFilterCompleted(e.target.value as 'All' | 'Done' | 'Not Done')}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                  className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39]"
             >
               <option value="All">All</option>
               <option value="Done">Done</option>
               <option value="Not Done">Not Done</option>
             </select>
+              </div>
           </div>
         </div>
 
         {/* Tasks Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
+          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-white/50">
+                <thead>
+                  <tr className="bg-white/50">
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700"
+                      className="px-3 sm:px-4 py-2 text-left text-xs sm:text-sm font-medium text-[#EC4899] cursor-pointer hover:text-pink-700"
                   onClick={toggleSortDirection}
                 >
                   Date {sortDirection === 'asc' ? '↑' : '↓'}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Done</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-3 sm:px-4 py-2 text-left text-xs sm:text-sm font-medium text-[#EC4899]">Task</th>
+                    <th className="px-3 sm:px-4 py-2 text-left text-xs sm:text-sm font-medium text-[#EC4899]">Assigned To</th>
+                    <th className="px-3 sm:px-4 py-2 text-left text-xs sm:text-sm font-medium text-[#EC4899]">Priority</th>
+                    <th className="px-3 sm:px-4 py-2 text-left text-xs sm:text-sm font-medium text-[#EC4899]">Done</th>
+                    <th className="px-3 sm:px-4 py-2 text-left text-xs sm:text-sm font-medium text-[#EC4899]">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="divide-y divide-white/50">
               {filteredAndSortedTasks.map((task) => (
-                <tr key={task.id} className={task.completed ? 'bg-purple-100' : 'bg-white'}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{task.date}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{task.description}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{task.owner}</td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-bold ${
-                    task.priority === 'High' ? 'text-red-600' :
-                    task.priority === 'Medium' ? 'text-yellow-600' :
-                    'text-green-600'
+                    <tr key={task.id} className={`hover:bg-white/30 transition-colors ${task.completed ? 'bg-white/50' : ''}`}>
+                      <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39]">{task.date}</td>
+                      <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39]">{task.description}</td>
+                      <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39]">{task.owner}</td>
+                      <td className={`px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium ${
+                        task.priority === 'High' ? 'text-[#EC4899]' :
+                        task.priority === 'Medium' ? 'text-[#EC4899]/80' :
+                        'text-[#EC4899]/60'
                   }`}>
                     {task.priority}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39]">
                     <input
                       type="checkbox"
                       checked={task.completed}
                       onChange={(e) => handleToggleTask(task.id, e.target.checked)}
-                      className="rounded border-gray-300 text-pink-500 focus:ring-pink-500"
+                          className="rounded border-[#EC4899]/30 text-[#EC4899] focus:ring-[#EC4899]"
                     />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39]">
                     <button
                       onClick={() => handleDeleteTask(task.id)}
-                      className="text-red-500 hover:text-red-700"
+                          className="text-[#EC4899] hover:text-pink-700 transition-colors"
                     >
                       Delete
                     </button>
@@ -249,6 +253,8 @@ export default function TimelinePage() {
               ))}
             </tbody>
           </table>
+            </div>
+          </div>
         </div>
       </div>
     </ProtectedRoute>

@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import Layout from './Layout';
 
 export default function ProtectedRoute({
   children,
@@ -31,5 +30,5 @@ export default function ProtectedRoute({
     return null;
   }
 
-  return <Layout>{children}</Layout>;
+  return <>{children}</>;
 } 

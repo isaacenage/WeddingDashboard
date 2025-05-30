@@ -4,6 +4,7 @@ import { Bars3Icon, XMarkIcon, HomeIcon, CalendarIcon, ClipboardDocumentCheckIco
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useRef } from 'react';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
@@ -17,23 +18,63 @@ const navigation = [
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [animationPhase, setAnimationPhase] = useState('initial');
+  const [transitionClass, setTransitionClass] = useState('');
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+  const previousPathname = useRef(pathname);
 
   // Handle page transitions
   useEffect(() => {
-    const handleRouteChange = () => {
-      setIsTransitioning(true);
-      // Reset transition state after animation completes
-      setTimeout(() => {
-        setIsTransitioning(false);
-      }, 300); // Match duration-300
-    };
+    const currentPathIndex = navigation.findIndex(item => item.href === pathname);
+    const previousPathIndex = navigation.findIndex(item => item.href === previousPathname.current);
 
-    handleRouteChange();
-  }, [pathname]);
+    let enterClass = '';
+    const pagesWithSmootherEntrance = ['/dashboard', '/calendar', '/checklist', '/setup'];
+
+    // Determine transition class
+    if (pagesWithSmootherEntrance.includes(pathname)) {
+      // Use a smoother fade-in from a slight vertical offset for these specific pages
+      if (currentPathIndex !== -1 && previousPathIndex !== -1) {
+         // Determine slight direction based on navigation index difference
+         if (currentPathIndex > previousPathIndex) {
+            enterClass = 'opacity-0 translate-y-4'; // Fade in slightly from below
+         } else {
+            enterClass = 'opacity-0 -translate-y-4'; // Fade in slightly from above
+         }
+      } else {
+         // Default subtle fade-in for initial load or if previous not found
+         enterClass = 'opacity-0 -translate-y-4';
+      }
+    } else if (currentPathIndex !== -1 && previousPathIndex !== -1) {
+      // Use full vertical swipe for other pages in the navigation list
+      if (currentPathIndex > previousPathIndex) {
+        // Navigating deeper - swipe up
+        enterClass = 'opacity-0 translate-y-full'; // Start from bottom
+      } else {
+        // Navigating upward - swipe down
+        enterClass = 'opacity-0 -translate-y-full'; // Start from top
+      }
+    } else {
+       // Fallback for navigation to/from pages not in navigation list (e.g., login)
+       enterClass = 'opacity-0 -translate-y-4'; // Simple fade-in from slightly above
+    }
+
+    setTransitionClass(enterClass);
+
+    // Set initial animation phase
+    setAnimationPhase('initial');
+
+    // Use a small timeout to allow initial classes to apply before transitioning
+    const timeoutId = setTimeout(() => {
+      setAnimationPhase('transitioning');
+    }, 50); // Small delay
+
+    // Clean up timeout on component unmount or pathname change
+    return () => clearTimeout(timeoutId);
+
+  }, [pathname]); // Depend on pathname to trigger effect on route change
 
   const handleLogout = async () => {
     try {
@@ -175,11 +216,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <main className="py-10">
           <div className="px-4 sm:px-6 lg:px-8">
             <div 
+              key={pathname}
               className={`
-                relative overflow-hidden
-                transition-all duration-300 ease-in-out
-                ${isTransitioning ? 'opacity-0 translate-x-10' : 'opacity-100 translate-x-0'}
-                will-change-transform will-change-opacity
+                relative
+                transition-all duration-500 ease-in-out
+                ${animationPhase === 'initial' ? transitionClass : 'opacity-100 translate-y-0'}
+                will-change-transform,opacity
               `}
             >
               <h1 className="page-title">

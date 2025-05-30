@@ -61,12 +61,12 @@ export default function ChecklistPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFE5EC] p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-[#FFE5EC] p-4 sm:p-6">
+      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
         <div className="flex justify-between items-center">
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {DEFAULT_CATEGORIES.map((category) => {
             const items = groupedItems[category] || [];
             const doneCount = items.filter(item => item.done).length;
@@ -75,11 +75,11 @@ export default function ChecklistPage() {
             return (
               <div
                 key={category}
-                className="bg-[#ffe0f0] rounded-lg shadow-md p-4 space-y-3 hover:shadow-lg transition-shadow"
+                className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6 space-y-3"
               >
                 <div className="flex justify-between items-center">
-                  <h2 className="text-lg font-medium text-gray-900">{category}</h2>
-                  <span className="text-sm text-gray-600 bg-white/50 px-2 py-1 rounded-full">
+                  <h2 className="text-lg sm:text-xl font-semibold text-[#EC4899]">{category}</h2>
+                  <span className="text-sm text-[#4a1d39] bg-white/50 px-2 py-1 rounded-full">
                     {doneCount} of {totalCount} done
                   </span>
                 </div>
@@ -88,20 +88,20 @@ export default function ChecklistPage() {
                   {items.map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between group bg-white/50 rounded-md p-2 hover:bg-white/70 transition-colors"
+                      className="flex items-center justify-between group bg-white/50 rounded-lg p-2 hover:bg-white/70 transition-colors"
                     >
                       <div className="flex items-center space-x-2 flex-1">
                         <input
                           type="checkbox"
                           checked={item.done}
                           onChange={() => handleToggleDone(item)}
-                          className="h-4 w-4 text-pink-600 rounded border-gray-300 focus:ring-pink-500"
+                          className="h-4 w-4 text-[#EC4899] rounded border-[#EC4899]/30 focus:ring-[#EC4899]"
                         />
                         <span
                           className={`text-sm ${
                             item.done
-                              ? 'line-through text-green-600'
-                              : 'text-gray-700 group-hover:font-medium'
+                              ? 'line-through text-[#4a1d39]/50'
+                              : 'text-[#4a1d39] group-hover:font-medium'
                           }`}
                         >
                           {item.description}
@@ -109,7 +109,7 @@ export default function ChecklistPage() {
                       </div>
                       <button
                         onClick={() => handleDelete(item.id)}
-                        className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition-opacity"
+                        className="opacity-0 group-hover:opacity-100 text-[#EC4899] hover:text-pink-700 transition-opacity"
                       >
                         <XMarkIcon className="h-4 w-4" />
                       </button>
@@ -117,7 +117,7 @@ export default function ChecklistPage() {
                   ))}
                 </div>
 
-                <div className="flex items-center space-x-2">
+                <div className="flex gap-2">
                   <input
                     type="text"
                     value={newItems[category] || ''}
@@ -126,11 +126,11 @@ export default function ChecklistPage() {
                     }
                     onKeyPress={(e) => handleKeyPress(e, category)}
                     placeholder="Add new item..."
-                    className="flex-1 text-sm bg-white/50 border-0 rounded-md shadow-sm focus:ring-2 focus:ring-pink-500 focus:bg-white"
+                    className="flex-1 text-sm bg-white/50 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-[#4a1d39] placeholder-[#EC4899]/70 p-2"
                   />
                   <button
                     onClick={() => handleAddItem(category)}
-                    className="p-1 text-pink-600 hover:text-pink-700 bg-white/50 rounded-md hover:bg-white/70 transition-colors"
+                    className="p-2 text-[#EC4899] hover:text-pink-700 bg-white/50 rounded-lg hover:bg-white/70 transition-colors"
                   >
                     <PlusIcon className="h-5 w-5" />
                   </button>
