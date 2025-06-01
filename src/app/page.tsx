@@ -40,7 +40,7 @@ export default function LoginPage() {
 
       <div className="relative z-10 w-full px-4 sm:mx-auto sm:w-[90%] max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-4xl sm:text-5xl font-gitalian text-white mb-2 drop-shadow-lg break-words">
+          <h1 className="text-4xl sm:text-5xl font-gitalian text-white mb-2 drop-shadow-lg break-words lg:whitespace-nowrap lg:break-normal">
             Andrea&Isaac
           </h1>
           <p className="text-lg sm:text-xl text-white mb-2 drop-shadow-lg">
