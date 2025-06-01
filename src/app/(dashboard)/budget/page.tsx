@@ -333,6 +333,67 @@ export default function BudgetPage() {
           </form>
         </div>
 
+        {/* Expenses Table */}
+        <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
+          <h2 className="text-xl sm:text-2xl font-semibold text-[#EC4899] mb-4">Expenses</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#ffcce4]">
+                  <th className="px-3 sm:px-4 py-2 text-left text-xs sm:text-sm font-bold text-pink-900">Vendor Type</th>
+                  <th className="px-3 sm:px-4 py-2 text-left text-xs sm:text-sm font-bold text-pink-900">Description</th>
+                  <th className="px-3 sm:px-4 py-2 text-right text-xs sm:text-sm font-bold text-pink-900">Amount</th>
+                  <th className="px-3 sm:px-4 py-2 text-right text-xs sm:text-sm font-bold text-pink-900">Paid</th>
+                  <th className="px-3 sm:px-4 py-2 text-right text-xs sm:text-sm font-bold text-pink-900">Remaining</th>
+                  <th className="px-3 sm:px-4 py-2 text-center text-xs sm:text-sm font-bold text-pink-900">Paid By</th>
+                  <th className="px-3 sm:px-4 py-2 text-center text-xs sm:text-sm font-bold text-pink-900">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/50">
+                {expenses.map((expense, index) => {
+                  const vendor = vendors.find(v => v.id === expense.vendor);
+                  const vendorContract = vendor?.contractPrice || 0;
+                  const remaining = Math.max(0, vendorContract - expense.amount);
+                  
+                  return (
+                    <tr key={expense.id} className={`${index % 2 === 0 ? 'bg-pink-50' : 'bg-pink-100'} hover:bg-white/30 transition-colors`}>
+                      <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39]">{expense.vendorType}</td>
+                      <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39]">
+                        {vendor?.name || 'Unknown Vendor'}
+                        {expense.notes && (
+                          <span className="block text-xs text-[#EC4899]/70 mt-1">{expense.notes}</span>
+                        )}
+                      </td>
+                      <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39] text-right">
+                        ₱{vendorContract.toLocaleString()}
+                      </td>
+                      <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39] text-right">
+                        ₱{expense.amount.toLocaleString()}
+                      </td>
+                      <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39] text-right">
+                        ₱{remaining.toLocaleString()}
+                      </td>
+                      <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-center">
+                        <span className={`font-medium ${expense.paidBy === 'Andrea' ? 'text-[#b10057]' : 'text-[#9c27b0]'}`}>
+                          {expense.paidBy}
+                        </span>
+                      </td>
+                      <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-center">
+                        <button
+                          onClick={() => handleDeleteExpense(expense.id)}
+                          className="text-[#EC4899] hover:text-pink-700 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         {/* Expense Form */}
         <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
           <h2 className="text-xl sm:text-2xl font-semibold text-[#EC4899] mb-4">Add Expense</h2>
