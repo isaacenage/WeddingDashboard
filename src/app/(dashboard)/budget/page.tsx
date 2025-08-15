@@ -23,7 +23,7 @@ export default function BudgetPage() {
   const [loading, setLoading] = useState(true);
   const [selectedVendorType, setSelectedVendorType] = useState('');
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
-  const [selectedVendors, setSelectedVendors] = useState<Record<string, string>>({});
+  const [selectedVendors, setSelectedVendors] = useState<Record<string, string[]>>({});
   const [newExpense, setNewExpense] = useState<{
     vendor: string;
     vendorType: string;
@@ -189,7 +189,7 @@ export default function BudgetPage() {
     // Calculate remaining for each selected vendor
     let totalLeft = 0;
     vendors.forEach(vendor => {
-      if (selectedVendors[vendor.serviceType] === vendor.id) {
+      if (selectedVendors[vendor.serviceType]?.includes(vendor.id)) {
         const paid = vendorTotals.get(vendor.id) || 0;
         totalLeft += Math.max(0, vendor.contractPrice - paid);
       }

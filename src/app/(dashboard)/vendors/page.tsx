@@ -11,7 +11,7 @@ import { FaEdit, FaTrash, FaSave, FaTimes } from 'react-icons/fa';
 export default function VendorsPage() {
   const { user } = useAuth();
   const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [selectedVendors, setSelectedVendors] = useState<Record<string, string>>({});
+  const [selectedVendors, setSelectedVendors] = useState<Record<string, string[]>>({});
   const [serviceTypes, setServiceTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMasterlistOpen, setIsMasterlistOpen] = useState(false);
@@ -83,10 +83,29 @@ export default function VendorsPage() {
   }, [user?.uid]);
 
   const handleVendorSelect = (serviceType: string, vendorId: string) => {
-    setSelectedVendors(prev => ({
-      ...prev,
-      [serviceType]: vendorId
-    }));
+    setSelectedVendors(prev => {
+      const currentVendors = prev[serviceType] || [];
+      const isSelected = currentVendors.includes(vendorId);
+      
+      if (isSelected) {
+        // Remove vendor from selection
+        const newVendors = currentVendors.filter(id => id !== vendorId);
+        if (newVendors.length === 0) {
+          const { [serviceType]: _, ...rest } = prev;
+          return rest;
+        }
+        return {
+          ...prev,
+          [serviceType]: newVendors
+        };
+      } else {
+        // Add vendor to selection
+        return {
+          ...prev,
+          [serviceType]: [...currentVendors, vendorId]
+        };
+      }
+    });
   };
 
   const handleAddVendor = async (e: React.FormEvent) => {
@@ -436,7 +455,7 @@ export default function VendorsPage() {
                     </thead>
                     <tbody className="divide-y divide-white/50">
                       {vendors.map(vendor => {
-                        const isSelected = selectedVendors[vendor.serviceType] === vendor.id;
+                        const isSelected = selectedVendors[vendor.serviceType]?.includes(vendor.id) || false;
                         const isEditing = editingVendor === vendor.id;
 
                         // Format vendor data with fallbacks

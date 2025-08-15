@@ -11,7 +11,7 @@ interface VendorGroupProps {
     serviceType: string;
     vendors: Vendor[];
   };
-  selectedVendors: Record<string, string>;
+  selectedVendors: Record<string, string[]>;
   onVendorSelect: (serviceType: string, vendorId: string) => void;
 }
 
@@ -58,13 +58,8 @@ export default function VendorGroup({ group, selectedVendors, onVendorSelect }: 
     
     try {
       setIsSelecting(true);
-      if (selectedVendors[group.serviceType] === vendor.id) {
-        await unselectVendor(user.uid, group.serviceType);
-        onVendorSelect(group.serviceType, '');
-      } else {
-        await selectVendor(user.uid, group.serviceType, vendor.id);
-        onVendorSelect(group.serviceType, vendor.id);
-      }
+      await selectVendor(user.uid, group.serviceType, vendor.id);
+      onVendorSelect(group.serviceType, vendor.id);
     } catch (error) {
       console.error('Error selecting vendor:', error);
     } finally {
@@ -78,7 +73,14 @@ export default function VendorGroup({ group, selectedVendors, onVendorSelect }: 
         className="bg-[#fbcfe8] p-4 sm:p-6 rounded-t-2xl flex justify-between items-center cursor-pointer shadow-md"
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
-        <h3 className="text-lg sm:text-xl font-semibold text-[#4a1d39]">{group.serviceType}</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg sm:text-xl font-semibold text-[#4a1d39]">{group.serviceType}</h3>
+          {selectedVendors[group.serviceType]?.length > 0 && (
+            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+              {selectedVendors[group.serviceType].length} selected
+            </span>
+          )}
+        </div>
         <svg
           className={`w-5 h-5 text-[#4a1d39] transform transition-transform duration-300 ${!isCollapsed ? 'rotate-180' : ''}`}
           fill="none"
@@ -97,7 +99,7 @@ export default function VendorGroup({ group, selectedVendors, onVendorSelect }: 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {group.vendors.map(vendor => {
           const { percentage, color, totalPaid } = getVendorProgress(vendor);
-          const isSelected = selectedVendors[group.serviceType] === vendor.id;
+          const isSelected = selectedVendors[group.serviceType]?.includes(vendor.id) || false;
           
           return (
                 <div
@@ -112,7 +114,7 @@ export default function VendorGroup({ group, selectedVendors, onVendorSelect }: 
                   disabled={isSelecting}
                     className={`absolute top-2 right-2 text-xs px-3 py-1 rounded-full shadow transition z-10 ${isSelecting ? 'opacity-50 cursor-not-allowed' : ''} ${isSelected ? 'bg-green-200 text-green-800' : 'bg-pink-100 text-pink-700 hover:bg-pink-200'}`}
                   >
-                    {isSelected ? 'Selected' : 'Pick This Vendor'}
+                    {isSelected ? 'Selected' : 'Select Vendor'}
                   </button>
 
                   <div className="relative rounded-bl-xl rounded-tr-3xl h-[180px] overflow-hidden">

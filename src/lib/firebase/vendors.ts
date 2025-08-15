@@ -104,7 +104,7 @@ export const getBudgetExpenses = (uid: string, callback: (expenses: any[]) => vo
 };
 
 // Selected Vendors
-export const getSelectedVendors = (uid: string, callback: (selectedVendors: Record<string, string>) => void) => {
+export const getSelectedVendors = (uid: string, callback: (selectedVendors: Record<string, string[]>) => void) => {
   const selectedVendorsRef = ref(db, `selectedVendors/${uid}`);
   
   return onValue(selectedVendorsRef, (snapshot) => {
@@ -116,9 +116,17 @@ export const getSelectedVendors = (uid: string, callback: (selectedVendors: Reco
 
     // Convert sanitized keys back to original format for the UI
     const desanitizedData = Object.entries(data).reduce((acc, [key, value]) => {
-      acc[key.replace(/-/g, '/')] = value as string;
+      const originalKey = key.replace(/-/g, '/');
+      // Handle both old (string) and new (array) formats for backward compatibility
+      if (typeof value === 'string') {
+        acc[originalKey] = [value];
+      } else if (Array.isArray(value)) {
+        acc[originalKey] = value;
+      } else {
+        acc[originalKey] = [];
+      }
       return acc;
-    }, {} as Record<string, string>);
+    }, {} as Record<string, string[]>);
 
     callback(desanitizedData);
   });
@@ -127,13 +135,60 @@ export const getSelectedVendors = (uid: string, callback: (selectedVendors: Reco
 export const selectVendor = async (uid: string, serviceType: string, vendorId: string) => {
   const sanitizedType = serviceType.replace(/\//g, '-');
   const selectedVendorRef = ref(db, `selectedVendors/${uid}/${sanitizedType}`);
-  await set(selectedVendorRef, vendorId);
+  
+  // Get current selected vendors for this service type
+  const snapshot = await get(selectedVendorRef);
+  const currentData = snapshot.val();
+  
+  let updatedVendors: string[];
+  
+  if (!currentData) {
+    // No vendors selected yet
+    updatedVendors = [vendorId];
+  } else if (typeof currentData === 'string') {
+    // Old format (single vendor), convert to array
+    updatedVendors = currentData === vendorId ? [] : [currentData, vendorId];
+  } else if (Array.isArray(currentData)) {
+    // New format (array), toggle vendor
+    if (currentData.includes(vendorId)) {
+      updatedVendors = currentData.filter(id => id !== vendorId);
+    } else {
+      updatedVendors = [...currentData, vendorId];
+    }
+  } else {
+    updatedVendors = [vendorId];
+  }
+  
+  if (updatedVendors.length === 0) {
+    await remove(selectedVendorRef);
+  } else {
+    await set(selectedVendorRef, updatedVendors);
+  }
 };
 
-export const unselectVendor = async (uid: string, serviceType: string) => {
+export const unselectVendor = async (uid: string, serviceType: string, vendorId?: string) => {
   const sanitizedType = serviceType.replace(/\//g, '-');
   const selectedVendorRef = ref(db, `selectedVendors/${uid}/${sanitizedType}`);
-  await remove(selectedVendorRef);
+  
+  if (!vendorId) {
+    // Remove all vendors for this service type
+    await remove(selectedVendorRef);
+  } else {
+    // Remove specific vendor
+    const snapshot = await get(selectedVendorRef);
+    const currentData = snapshot.val();
+    
+    if (Array.isArray(currentData)) {
+      const updatedVendors = currentData.filter(id => id !== vendorId);
+      if (updatedVendors.length === 0) {
+        await remove(selectedVendorRef);
+      } else {
+        await set(selectedVendorRef, updatedVendors);
+      }
+    } else if (currentData === vendorId) {
+      await remove(selectedVendorRef);
+    }
+  }
 };
 
 // Migration function to convert push-generated keys to timestamp-based keys
