@@ -178,28 +178,27 @@ export default function BudgetPage() {
   };
 
   const calculateLeftToPay = () => {
-    const vendorTotals = new Map<string, number>();
-    
-    // Sum all payments per vendor
-    expenses.forEach(expense => {
-      const current = vendorTotals.get(expense.vendor) || 0;
-      vendorTotals.set(expense.vendor, current + expense.amount);
-    });
+    // Get unique vendor IDs from expenses (avoid counting duplicate vendors)
+    const uniqueVendorIds = new Set(expenses.map(expense => expense.vendor));
 
-    // Calculate remaining for each selected vendor
-    let totalLeft = 0;
-    vendors.forEach(vendor => {
-      if (selectedVendors[vendor.serviceType]?.includes(vendor.id)) {
-        const paid = vendorTotals.get(vendor.id) || 0;
-        totalLeft += Math.max(0, vendor.contractPrice - paid);
-      }
-    });
+    // Sum contract prices for unique vendors only (each vendor counted once)
+    const totalContractPrice = Array.from(uniqueVendorIds).reduce((sum, vendorId) => {
+      const vendor = vendors.find(v => v.id === vendorId);
+      return sum + (vendor?.contractPrice || 0);
+    }, 0);
 
-    return totalLeft;
+    // Total Amount Paid in Budget Page
+    const totalPaid = calculateTotalPaid();
+
+    return Math.max(0, totalContractPrice - totalPaid);
   };
 
   const calculateBudgetLeft = () => {
     return calculateTotalBudget() - calculateTotalPaid();
+  };
+
+  const calculateActualRemaining = () => {
+    return calculateBudgetLeft() - calculateLeftToPay();
   };
 
   const calculatePersonalBreakdown = (person: 'Andrea' | 'Isaac') => {
@@ -225,29 +224,35 @@ export default function BudgetPage() {
       <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
-            <h3 className="text-base sm:text-lg font-semibold text-[#EC4899] mb-2">Wedding Budget</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
+          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6 flex flex-col justify-between h-full">
+            <h3 className="text-base sm:text-lg font-semibold text-[#EC4899] mb-2 h-12 flex items-center">Wedding Budget</h3>
             <p className="text-xl sm:text-2xl font-bold text-[#4a1d39]">
               ₱{calculateTotalBudget().toLocaleString()}
             </p>
           </div>
-          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
-            <h3 className="text-base sm:text-lg font-semibold text-[#EC4899] mb-2">Total Paid</h3>
+          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6 flex flex-col justify-between h-full">
+            <h3 className="text-base sm:text-lg font-semibold text-[#EC4899] mb-2 h-12 flex items-center">Total Paid</h3>
             <p className="text-xl sm:text-2xl font-bold text-[#4a1d39]">
               ₱{calculateTotalPaid().toLocaleString()}
             </p>
           </div>
-          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
-            <h3 className="text-base sm:text-lg font-semibold text-[#EC4899] mb-2">Left to Pay</h3>
+          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6 flex flex-col justify-between h-full">
+            <h3 className="text-base sm:text-lg font-semibold text-[#EC4899] mb-2 h-12 flex items-center">Left to Pay</h3>
             <p className="text-xl sm:text-2xl font-bold text-[#4a1d39]">
               ₱{calculateLeftToPay().toLocaleString()}
             </p>
           </div>
-          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
-            <h3 className="text-base sm:text-lg font-semibold text-[#EC4899] mb-2">Budget Left</h3>
+          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6 flex flex-col justify-between h-full">
+            <h3 className="text-base sm:text-lg font-semibold text-[#EC4899] mb-2 h-12 flex items-center">Budget Left</h3>
             <p className="text-xl sm:text-2xl font-bold text-[#4a1d39]">
               ₱{calculateBudgetLeft().toLocaleString()}
+            </p>
+          </div>
+          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6 flex flex-col justify-between h-full">
+            <h3 className="text-base sm:text-lg font-semibold text-[#EC4899] mb-2 h-12 flex items-center">Actual Remaining</h3>
+            <p className="text-xl sm:text-2xl font-bold text-[#4a1d39]">
+              ₱{calculateActualRemaining().toLocaleString()}
             </p>
           </div>
         </div>
