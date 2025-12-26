@@ -14,8 +14,8 @@ export default function VendorsPage() {
   const [selectedVendors, setSelectedVendors] = useState<Record<string, string[]>>({});
   const [serviceTypes, setServiceTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isMasterlistOpen, setIsMasterlistOpen] = useState(false);
-  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+  const [isMasterlistModalOpen, setIsMasterlistModalOpen] = useState(false);
+  const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   const [editingVendor, setEditingVendor] = useState<string | null>(null);
   const [editFormData, setEditFormData] = useState<VendorFormData>({
     name: '',
@@ -36,27 +36,6 @@ export default function VendorsPage() {
   const [formError, setFormError] = useState('');
   const [isMigrating, setIsMigrating] = useState(false);
 
-  // Initialize collapse states from localStorage after mount
-  useEffect(() => {
-    const hasSession = localStorage.getItem('hasSession');
-    if (hasSession) {
-      setIsMasterlistOpen(localStorage.getItem('isMasterlistOpen') === 'true');
-      setIsSummaryOpen(localStorage.getItem('isSummaryOpen') === 'true');
-    }
-  }, []);
-
-  // Update localStorage when collapse states change
-  useEffect(() => {
-    localStorage.setItem('isMasterlistOpen', isMasterlistOpen.toString());
-    localStorage.setItem('isSummaryOpen', isSummaryOpen.toString());
-  }, [isMasterlistOpen, isSummaryOpen]);
-
-  // Set session flag when user logs in
-  useEffect(() => {
-    if (user?.uid) {
-      localStorage.setItem('hasSession', 'true');
-    }
-  }, [user?.uid]);
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -331,336 +310,23 @@ export default function VendorsPage() {
   return (
     <div className="min-h-screen bg-[#FFE5EC] p-4 sm:p-6">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-        {/* Two-column layout for Masterlist and Selected Vendors */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          {/* Vendor Masterlist */}
-          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg sm:text-xl font-semibold text-[#EC4899]">Vendor Masterlist</h2>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleCleanup}
-                  className="text-[#EC4899] hover:text-pink-700 text-sm"
-                >
-                  Clean Up
-                </button>
-                <button
-                  onClick={handleMigration}
-                  disabled={isMigrating}
-                  className={`text-[#EC4899] hover:text-pink-700 text-sm ${isMigrating ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {isMigrating ? 'Migrating...' : 'Fix Vendor IDs'}
-                </button>
-                <button
-                  onClick={() => setIsMasterlistOpen(!isMasterlistOpen)}
-                  className="flex items-center gap-2 text-[#EC4899] hover:text-pink-700"
-                >
-                  {isMasterlistOpen ? 'Hide' : 'Show'} Masterlist
-                  <svg
-                    className={`w-5 h-5 transform transition-transform ${isMasterlistOpen ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {isMasterlistOpen && (
-              <>
-                {/* Add Vendor Form */}
-                <form onSubmit={handleAddVendor} className="mb-6 space-y-4">
-                  {formError && (
-                    <div className="text-red-500 text-sm bg-red-50 p-2 rounded-lg">
-                      {formError}
-                    </div>
-                  )}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-[#EC4899] mb-1">Vendor Name</label>
-                      <input
-                        type="text"
-                        value={newVendor.name}
-                        onChange={(e) => setNewVendor(prev => ({ ...prev, name: e.target.value }))}
-                        className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39] placeholder-[#EC4899]/70"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#EC4899] mb-1">
-                        Service Type <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        value={newVendor.serviceType}
-                        onChange={(e) => {
-                          setNewVendor(prev => ({ ...prev, serviceType: e.target.value }));
-                          setFormError(''); // Clear error when selection changes
-                        }}
-                        className={`w-full p-2 sm:p-3 border ${formError && !newVendor.serviceType ? 'border-red-500' : 'border-[#EC4899]/30'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm ${newVendor.serviceType ? 'text-[#4a1d39]' : 'text-[#EC4899]/70'}`}
-                        required
-                      >
-                        <option value="" className="text-[#EC4899]/70">Select Type</option>
-                        {serviceTypes.map(type => (
-                          <option key={type} value={type} className="text-[#4a1d39]">
-                            {type}
-                          </option>
-                        ))}
-                      </select>
-                      {formError && !newVendor.serviceType && (
-                        <p className="mt-1 text-xs text-red-500">Please select a service type</p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#EC4899] mb-1">Contact Number</label>
-                      <input
-                        type="tel"
-                        value={newVendor.contactNumber}
-                        onChange={(e) => setNewVendor(prev => ({ ...prev, contactNumber: e.target.value }))}
-                        className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39] placeholder-[#EC4899]/70"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#EC4899] mb-1">Email</label>
-                      <input
-                        type="email"
-                        value={newVendor.email}
-                        onChange={(e) => setNewVendor(prev => ({ ...prev, email: e.target.value }))}
-                        className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39] placeholder-[#EC4899]/70"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#EC4899] mb-1">Package Name</label>
-                      <input
-                        type="text"
-                        value={newVendor.packageName}
-                        onChange={(e) => setNewVendor(prev => ({ ...prev, packageName: e.target.value }))}
-                        className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39] placeholder-[#EC4899]/70"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#EC4899] mb-1">Contract Price (₱)</label>
-                      <input
-                        type="number"
-                        value={newVendor.contractPrice || ''}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          setNewVendor(prev => ({
-                            ...prev,
-                            contractPrice: value === '' ? 0 : parseFloat(value)
-                          }));
-                        }}
-                        className="w-full p-2 sm:p-3 border border-[#EC4899]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent transition-all text-sm text-[#4a1d39] placeholder-[#EC4899]/70"
-                        required
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full bg-[#EC4899] text-white px-4 py-2 sm:py-3 rounded-lg hover:bg-pink-600 active:scale-95 transition-all text-sm font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={!newVendor.serviceType || !serviceTypes.includes(newVendor.serviceType)}
-                  >
-                    Add Vendor
-                  </button>
-                </form>
-
-                {/* Vendor List */}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead>
-                      <tr className="bg-white/30">
-                        <th className="px-2 sm:px-3 py-3 text-xs sm:text-sm font-medium text-[#4a1d39]">Service Type</th>
-                        <th className="px-2 sm:px-3 py-3 text-xs sm:text-sm font-medium text-[#4a1d39]">Vendor Name</th>
-                        <th className="px-2 sm:px-3 py-3 text-xs sm:text-sm font-medium text-[#4a1d39] text-right">Contract Price</th>
-                        <th className="px-2 sm:px-3 py-3 text-xs sm:text-sm font-medium text-[#4a1d39]">Contact Info</th>
-                        <th className="px-2 sm:px-3 py-3 text-xs sm:text-sm font-medium text-[#4a1d39]">Email</th>
-                        <th className="px-2 sm:px-3 py-3 text-xs sm:text-sm font-medium text-[#4a1d39]">Package Name</th>
-                        <th className="px-2 sm:px-3 py-3 text-xs sm:text-sm font-medium text-[#4a1d39] text-center">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/50">
-                      {vendors.map(vendor => {
-                        const isSelected = selectedVendors[vendor.serviceType]?.includes(vendor.id) || false;
-                        const isEditing = editingVendor === vendor.id;
-
-                        // Format vendor data with fallbacks
-                        const vendorType = vendor.serviceType || '—';
-                        const vendorName = vendor.name || '—';
-                        const contactNumber = vendor.contactNumber || '—';
-                        const email = vendor.email || '—';
-                        const packageName = vendor.packageName || '—';
-                        const price = isNaN(vendor.contractPrice) ? '₱0' : `₱${vendor.contractPrice.toLocaleString()}`;
-
-                        return (
-                          <tr key={vendor.id} className={`hover:bg-white/30 transition-colors ${isSelected ? 'bg-white/50' : ''}`}>
-                            <td className="px-2 sm:px-3 py-3 text-xs sm:text-sm text-[#4a1d39]">
-                              {isEditing ? (
-                                <select
-                                  value={editFormData.serviceType}
-                                  onChange={(e) => setEditFormData(prev => ({ ...prev, serviceType: e.target.value }))}
-                                  className="w-full p-1 border border-[#EC4899]/30 rounded focus:outline-none focus:ring-1 focus:ring-[#EC4899] text-[#4a1d39]"
-                                  required
-                                >
-                                  <option value="" className="text-[#EC4899]/70">Select Type</option>
-                                  {serviceTypes.map(type => (
-                                    <option key={type} value={type} className="text-[#4a1d39]">
-                                      {type}
-                                    </option>
-                                  ))}
-                                </select>
-                              ) : (
-                                vendorType
-                              )}
-                            </td>
-                            <td className="px-2 sm:px-3 py-3 text-xs sm:text-sm text-[#4a1d39]">
-                              {isEditing ? (
-                                <input
-                                  type="text"
-                                  value={editFormData.name}
-                                  onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
-                                  className="w-full p-1 border border-[#EC4899]/30 rounded focus:outline-none focus:ring-1 focus:ring-[#EC4899]"
-                                  required
-                                />
-                              ) : (
-                                vendorName
-                              )}
-                            </td>
-                            <td className="px-2 sm:px-3 py-3 text-xs sm:text-sm text-[#4a1d39] text-right">
-                              {isEditing ? (
-                                <input
-                                  type="number"
-                                  value={editFormData.contractPrice || ''}
-                                  onChange={(e) => setEditFormData(prev => ({ ...prev, contractPrice: e.target.value === '' ? 0 : parseFloat(e.target.value) }))}
-                                  className="w-full p-1 border border-[#EC4899]/30 rounded focus:outline-none focus:ring-1 focus:ring-[#EC4899] text-right"
-                                  min="0"
-                                  step="0.01"
-                                  required
-                                />
-                              ) : (
-                                price
-                              )}
-                            </td>
-                            <td className="px-2 sm:px-3 py-3 text-xs sm:text-sm text-[#4a1d39]">
-                              {isEditing ? (
-                                <input
-                                  type="tel"
-                                  value={editFormData.contactNumber}
-                                  onChange={(e) => setEditFormData(prev => ({ ...prev, contactNumber: e.target.value }))}
-                                  className="w-full p-1 border border-[#EC4899]/30 rounded focus:outline-none focus:ring-1 focus:ring-[#EC4899]"
-                                  required
-                                />
-                              ) : (
-                                contactNumber
-                              )}
-                            </td>
-                            <td className="px-2 sm:px-3 py-3 text-xs sm:text-sm text-[#4a1d39]">
-                              {isEditing ? (
-                                <input
-                                  type="email"
-                                  value={editFormData.email}
-                                  onChange={(e) => setEditFormData(prev => ({ ...prev, email: e.target.value }))}
-                                  className="w-full p-1 border border-[#EC4899]/30 rounded focus:outline-none focus:ring-1 focus:ring-[#EC4899]"
-                                />
-                              ) : (
-                                email
-                              )}
-                            </td>
-                            <td className="px-2 sm:px-3 py-3 text-xs sm:text-sm text-[#4a1d39]">
-                              {isEditing ? (
-                                <input
-                                  type="text"
-                                  value={editFormData.packageName}
-                                  onChange={(e) => setEditFormData(prev => ({ ...prev, packageName: e.target.value }))}
-                                  className="w-full p-1 border border-[#EC4899]/30 rounded focus:outline-none focus:ring-1 focus:ring-[#EC4899]"
-                                  required
-                                />
-                              ) : (
-                                packageName
-                              )}
-                            </td>
-                            <td className="px-2 sm:px-3 py-3 text-xs sm:text-sm text-center">
-                              {isEditing ? (
-                                <div className="flex items-center justify-center space-x-2">
-                                  <button
-                                    onClick={() => handleSaveEdit(vendor.id)}
-                                    className="text-green-600 hover:text-green-800 transition-colors"
-                                    title="Save"
-                                  >
-                                    <FaSave size={16} />
-                                  </button>
-                                  <button
-                                    onClick={handleCancelEdit}
-                                    className="text-gray-600 hover:text-gray-800 transition-colors"
-                                    title="Cancel"
-                                  >
-                                    <FaTimes size={16} />
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className="flex items-center justify-center space-x-2">
-                                  <button
-                                    onClick={() => handleEditClick(vendor)}
-                                    className="text-[#EC4899] hover:text-pink-700 transition-colors"
-                                    title="Edit"
-                                  >
-                                    <FaEdit size={16} />
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteVendor(vendor.id)}
-                                    className="text-red-500 hover:text-red-700 transition-colors"
-                                    title="Delete"
-                                  >
-                                    <FaTrash size={16} />
-                                  </button>
-                                </div>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Selected Vendors Summary */}
-          <div className="bg-[#ffd5e0]/90 rounded-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl sm:text-2xl font-semibold text-[#EC4899]">Selected Vendors</h2>
-              <button
-                onClick={() => setIsSummaryOpen(!isSummaryOpen)}
-                className="flex items-center gap-2 text-[#EC4899] hover:text-pink-700"
-              >
-                {isSummaryOpen ? 'Hide' : 'Show'} Selected Vendors
-                <svg
-                  className={`w-5 h-5 transform transition-transform ${isSummaryOpen ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-            </div>
-
-            {isSummaryOpen && (
-              <VendorSummary
-                vendors={vendors}
-                selectedVendors={selectedVendors}
-              />
-            )}
-          </div>
+        {/* Action Buttons */}
+        <div className="flex gap-3 justify-center sm:justify-start flex-wrap">
+          <button
+            onClick={() => setIsMasterlistModalOpen(true)}
+            className="bg-gradient-to-r from-[#EC4899] to-pink-600 text-white px-6 py-3 rounded-xl hover:shadow-xl active:scale-95 transition-all font-semibold text-sm shadow-lg"
+          >
+            Vendor Masterlist
+          </button>
+          <button
+            onClick={() => setIsSummaryModalOpen(true)}
+            className="bg-gradient-to-r from-[#ffd5e0] to-[#fbcfe8] text-[#4a1d39] px-6 py-3 rounded-xl hover:shadow-xl active:scale-95 transition-all font-semibold text-sm shadow-lg"
+          >
+            Selected Vendors Summary
+          </button>
         </div>
 
-        {/* Vendor Groups */}
+        {/* Vendor Groups - Full Width */}
         <div className="space-y-4 sm:space-y-6">
           {getVendorGroups().map(group => (
             <VendorGroup
@@ -671,6 +337,333 @@ export default function VendorsPage() {
           ))}
         </div>
       </div>
+
+      {/* Vendor Masterlist Modal */}
+      {isMasterlistModalOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setIsMasterlistModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-[#EC4899] to-pink-600 p-4 sm:p-6 flex justify-between items-center">
+              <h2 className="text-xl sm:text-2xl font-bold text-white">Vendor Masterlist</h2>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleCleanup}
+                  className="text-white/90 hover:text-white text-sm px-3 py-1.5 bg-white/20 rounded-lg hover:bg-white/30 transition-all"
+                >
+                  Clean Up
+                </button>
+                <button
+                  onClick={handleMigration}
+                  disabled={isMigrating}
+                  className={`text-white/90 hover:text-white text-sm px-3 py-1.5 bg-white/20 rounded-lg hover:bg-white/30 transition-all ${isMigrating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {isMigrating ? 'Migrating...' : 'Fix Vendor IDs'}
+                </button>
+                <button
+                  onClick={() => setIsMasterlistModalOpen(false)}
+                  className="text-white hover:bg-white/20 rounded-full p-2 transition-all"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              {/* Add Vendor Form */}
+              <form onSubmit={handleAddVendor} className="mb-6 bg-gray-50 p-4 rounded-xl">
+                <h3 className="text-lg font-semibold text-[#EC4899] mb-3">Add New Vendor</h3>
+                {formError && (
+                  <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg mb-3">
+                    {formError}
+                  </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Vendor Name</label>
+                    <input
+                      type="text"
+                      value={newVendor.name}
+                      onChange={(e) => setNewVendor(prev => ({ ...prev, name: e.target.value }))}
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] text-sm"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Service Type</label>
+                    <select
+                      value={newVendor.serviceType}
+                      onChange={(e) => {
+                        setNewVendor(prev => ({ ...prev, serviceType: e.target.value }));
+                        setFormError('');
+                      }}
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] text-sm"
+                      required
+                    >
+                      <option value="">Select Type</option>
+                      {serviceTypes.map(type => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                    <input
+                      type="tel"
+                      value={newVendor.contactNumber}
+                      onChange={(e) => setNewVendor(prev => ({ ...prev, contactNumber: e.target.value }))}
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] text-sm"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input
+                      type="email"
+                      value={newVendor.email}
+                      onChange={(e) => setNewVendor(prev => ({ ...prev, email: e.target.value }))}
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] text-sm"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Package Name</label>
+                    <input
+                      type="text"
+                      value={newVendor.packageName}
+                      onChange={(e) => setNewVendor(prev => ({ ...prev, packageName: e.target.value }))}
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] text-sm"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Contract Price (₱)</label>
+                    <input
+                      type="number"
+                      value={newVendor.contractPrice || ''}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setNewVendor(prev => ({
+                          ...prev,
+                          contractPrice: value === '' ? 0 : parseFloat(value)
+                        }));
+                      }}
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EC4899] text-sm"
+                      required
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  className="mt-4 w-full bg-[#EC4899] text-white px-4 py-2.5 rounded-lg hover:bg-pink-600 active:scale-95 transition-all font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!newVendor.serviceType || !serviceTypes.includes(newVendor.serviceType)}
+                >
+                  Add Vendor
+                </button>
+              </form>
+
+              {/* Vendor Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-[#fbcfe8] to-[#fce7f3]">
+                      <th className="p-3 text-left text-sm font-semibold text-[#4a1d39] border-b-2 border-[#EC4899]">Service Type</th>
+                      <th className="p-3 text-left text-sm font-semibold text-[#4a1d39] border-b-2 border-[#EC4899]">Vendor Name</th>
+                      <th className="p-3 text-left text-sm font-semibold text-[#4a1d39] border-b-2 border-[#EC4899]">Package</th>
+                      <th className="p-3 text-left text-sm font-semibold text-[#4a1d39] border-b-2 border-[#EC4899]">Contact</th>
+                      <th className="p-3 text-left text-sm font-semibold text-[#4a1d39] border-b-2 border-[#EC4899]">Email</th>
+                      <th className="p-3 text-left text-sm font-semibold text-[#4a1d39] border-b-2 border-[#EC4899]">Price</th>
+                      <th className="p-3 text-left text-sm font-semibold text-[#4a1d39] border-b-2 border-[#EC4899]">Status</th>
+                      <th className="p-3 text-center text-sm font-semibold text-[#4a1d39] border-b-2 border-[#EC4899]">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {vendors.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="text-center py-8 text-gray-500">No vendors yet</td>
+                      </tr>
+                    ) : (
+                      vendors.map(vendor => {
+                        const isSelected = selectedVendors[vendor.serviceType]?.includes(vendor.id) || false;
+                        const isEditing = editingVendor === vendor.id;
+
+                        return (
+                          <tr key={vendor.id} className={`border-b border-gray-200 hover:bg-gray-50 ${isEditing ? 'bg-blue-50' : ''}`}>
+                            {isEditing ? (
+                              <>
+                                <td className="p-2">
+                                  <select
+                                    value={editFormData.serviceType}
+                                    onChange={(e) => setEditFormData(prev => ({ ...prev, serviceType: e.target.value }))}
+                                    className="w-full p-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#EC4899]"
+                                    required
+                                  >
+                                    <option value="">Select</option>
+                                    {serviceTypes.map(type => (
+                                      <option key={type} value={type}>{type}</option>
+                                    ))}
+                                  </select>
+                                </td>
+                                <td className="p-2">
+                                  <input
+                                    type="text"
+                                    value={editFormData.name}
+                                    onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
+                                    className="w-full p-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#EC4899]"
+                                    required
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <input
+                                    type="text"
+                                    value={editFormData.packageName}
+                                    onChange={(e) => setEditFormData(prev => ({ ...prev, packageName: e.target.value }))}
+                                    className="w-full p-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#EC4899]"
+                                    required
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <input
+                                    type="tel"
+                                    value={editFormData.contactNumber}
+                                    onChange={(e) => setEditFormData(prev => ({ ...prev, contactNumber: e.target.value }))}
+                                    className="w-full p-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#EC4899]"
+                                    required
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <input
+                                    type="email"
+                                    value={editFormData.email}
+                                    onChange={(e) => setEditFormData(prev => ({ ...prev, email: e.target.value }))}
+                                    className="w-full p-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#EC4899]"
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <input
+                                    type="number"
+                                    value={editFormData.contractPrice || ''}
+                                    onChange={(e) => setEditFormData(prev => ({ ...prev, contractPrice: e.target.value === '' ? 0 : parseFloat(e.target.value) }))}
+                                    className="w-full p-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#EC4899]"
+                                    min="0"
+                                    step="0.01"
+                                    required
+                                  />
+                                </td>
+                                <td className="p-2"></td>
+                                <td className="p-2">
+                                  <div className="flex gap-1 justify-center">
+                                    <button
+                                      onClick={() => handleSaveEdit(vendor.id)}
+                                      className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 transition-colors text-xs"
+                                    >
+                                      <FaSave size={12} />
+                                    </button>
+                                    <button
+                                      onClick={handleCancelEdit}
+                                      className="bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700 transition-colors text-xs"
+                                    >
+                                      <FaTimes size={12} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </>
+                            ) : (
+                              <>
+                                <td className="p-3">
+                                  <span className="inline-block bg-[#EC4899]/10 text-[#EC4899] text-xs font-medium px-2 py-1 rounded">
+                                    {vendor.serviceType || '—'}
+                                  </span>
+                                </td>
+                                <td className="p-3 text-sm font-medium text-[#4a1d39]">{vendor.name || '—'}</td>
+                                <td className="p-3 text-sm text-gray-700">{vendor.packageName || '—'}</td>
+                                <td className="p-3 text-sm text-gray-700">{vendor.contactNumber || '—'}</td>
+                                <td className="p-3 text-sm text-gray-700">{vendor.email || '—'}</td>
+                                <td className="p-3 text-sm font-semibold text-[#EC4899]">
+                                  ₱{isNaN(vendor.contractPrice) ? '0' : vendor.contractPrice.toLocaleString()}
+                                </td>
+                                <td className="p-3">
+                                  {isSelected && (
+                                    <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                                      ✓ Selected
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="p-3">
+                                  <div className="flex gap-2 justify-center">
+                                    <button
+                                      onClick={() => handleEditClick(vendor)}
+                                      className="bg-[#EC4899] text-white px-2 py-1 rounded hover:bg-pink-600 transition-colors text-xs"
+                                      title="Edit"
+                                    >
+                                      <FaEdit size={12} />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteVendor(vendor.id)}
+                                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition-colors text-xs"
+                                      title="Delete"
+                                    >
+                                      <FaTrash size={12} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </>
+                            )}
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Selected Vendors Summary Modal */}
+      {isSummaryModalOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setIsSummaryModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-[#ffd5e0] to-[#fbcfe8] p-4 sm:p-6 flex justify-between items-center">
+              <h2 className="text-xl sm:text-2xl font-bold text-[#4a1d39]">Selected Vendors Summary</h2>
+              <button
+                onClick={() => setIsSummaryModalOpen(false)}
+                className="text-[#4a1d39] hover:bg-white/30 rounded-full p-2 transition-all"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              <VendorSummary
+                vendors={vendors}
+                selectedVendors={selectedVendors}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

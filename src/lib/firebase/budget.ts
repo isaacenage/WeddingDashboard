@@ -92,6 +92,11 @@ export const addBudgetExpense = async (uid: string, expense: Omit<BudgetExpense,
   });
 };
 
+export const updateBudgetExpense = async (uid: string, expenseId: string, expense: Partial<Omit<BudgetExpense, 'id'>>) => {
+  const expenseRef = ref(db, `budgetExpenses/${uid}/${expenseId}`);
+  await update(expenseRef, expense);
+};
+
 export const deleteBudgetExpense = async (uid: string, expenseId: string) => {
   const expenseRef = ref(db, `budgetExpenses/${uid}/${expenseId}`);
   await set(expenseRef, null);

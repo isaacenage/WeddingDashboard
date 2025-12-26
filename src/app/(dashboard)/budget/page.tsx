@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getVendors, getSelectedVendors } from '@/lib/firebase/vendors';
-import { 
-  getBudgetExpenses, 
-  addBudgetExpense, 
+import {
+  getBudgetExpenses,
+  addBudgetExpense,
+  updateBudgetExpense,
   deleteBudgetExpense,
   getBudgetContributions,
   addBudgetContribution,
@@ -14,6 +15,7 @@ import {
   BudgetContribution
 } from '@/lib/firebase/budget';
 import { Vendor } from '@/types/vendor';
+import { FaTrash, FaPencilAlt, FaSave } from 'react-icons/fa';
 
 export default function BudgetPage() {
   const { user } = useAuth();
@@ -42,6 +44,18 @@ export default function BudgetPage() {
   const [newContribution, setNewContribution] = useState({
     name: '',
     amount: ''
+  });
+  const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
+  const [editedExpense, setEditedExpense] = useState<{
+    amount: string;
+    date: string;
+    paidBy: 'Andrea' | 'Isaac';
+    notes: string;
+  }>({
+    amount: '',
+    date: '',
+    paidBy: 'Andrea',
+    notes: ''
   });
 
   useEffect(() => {
@@ -159,6 +173,41 @@ export default function BudgetPage() {
     } catch (error) {
       console.error('Error deleting expense:', error);
     }
+  };
+
+  const handleEditExpense = (expense: BudgetExpense) => {
+    setEditingExpenseId(expense.id);
+    setEditedExpense({
+      amount: expense.amount.toString(),
+      date: expense.date,
+      paidBy: expense.paidBy,
+      notes: expense.notes || ''
+    });
+  };
+
+  const handleSaveExpense = async (id: string) => {
+    if (!user?.uid) return;
+    try {
+      await updateBudgetExpense(user.uid, id, {
+        amount: parseFloat(editedExpense.amount),
+        date: editedExpense.date,
+        paidBy: editedExpense.paidBy,
+        notes: editedExpense.notes
+      });
+      setEditingExpenseId(null);
+    } catch (error) {
+      console.error('Error updating expense:', error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingExpenseId(null);
+    setEditedExpense({
+      amount: '',
+      date: '',
+      paidBy: 'Andrea',
+      notes: ''
+    });
   };
 
   const getVendorTypes = () => {
@@ -351,49 +400,183 @@ export default function BudgetPage() {
                   <th className="px-3 sm:px-4 py-2 text-right text-xs sm:text-sm font-bold text-pink-900">Paid</th>
                   <th className="px-3 sm:px-4 py-2 text-right text-xs sm:text-sm font-bold text-pink-900">Remaining</th>
                   <th className="px-3 sm:px-4 py-2 text-center text-xs sm:text-sm font-bold text-pink-900">Paid By</th>
+                  <th className="px-3 sm:px-4 py-2 text-center text-xs sm:text-sm font-bold text-pink-900">Date Paid</th>
                   <th className="px-3 sm:px-4 py-2 text-center text-xs sm:text-sm font-bold text-pink-900">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/50">
-                {expenses.map((expense, index) => {
-                  const vendor = vendors.find(v => v.id === expense.vendor);
-                  const vendorContract = vendor?.contractPrice || 0;
-                  const remaining = Math.max(0, vendorContract - expense.amount);
-                  
-                  return (
-                    <tr key={expense.id} className={`${index % 2 === 0 ? 'bg-pink-50' : 'bg-pink-100'} hover:bg-white/30 transition-colors`}>
-                      <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39]">{expense.vendorType}</td>
-                      <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39]">
-                        {vendor?.name || 'Unknown Vendor'}
-                        {expense.notes && (
-                          <span className="block text-xs text-[#EC4899]/70 mt-1">{expense.notes}</span>
-                        )}
-                      </td>
+                {(() => {
+                  // Group expenses by vendor, then sort by earliest payment date
+                  const sortedExpenses = (() => {
+                    // Group expenses by vendor
+                    const vendorGroups = expenses.reduce((groups, expense) => {
+                      if (!groups[expense.vendor]) {
+                        groups[expense.vendor] = [];
+                      }
+                      groups[expense.vendor].push(expense);
+                      return groups;
+                    }, {} as Record<string, BudgetExpense[]>);
+
+                    // For each vendor group, sort by date and get earliest date
+                    const sortedVendorGroups = Object.entries(vendorGroups).map(([vendorId, vendorExpenses]) => {
+                      // Sort this vendor's expenses by date
+                      const sorted = vendorExpenses.sort((a, b) =>
+                        new Date(a.date).getTime() - new Date(b.date).getTime()
+                      );
+                      return {
+                        vendorId,
+                        expenses: sorted,
+                        earliestDate: new Date(sorted[0].date).getTime()
+                      };
+                    });
+
+                    // Sort vendor groups by their earliest date
+                    sortedVendorGroups.sort((a, b) => a.earliestDate - b.earliestDate);
+
+                    // Flatten back into a single array
+                    return sortedVendorGroups.flatMap(group => group.expenses);
+                  })();
+
+                  // Track which vendor we're on for grouping
+                  let currentVendor = '';
+                  let vendorPaymentIndex = 0;
+
+                  return sortedExpenses.map((expense, index) => {
+                    const vendor = vendors.find(v => v.id === expense.vendor);
+                    const vendorContract = vendor?.contractPrice || 0;
+
+                    // Check if this is a new vendor or continuation
+                    const isNewVendor = expense.vendor !== currentVendor;
+                    if (isNewVendor) {
+                      currentVendor = expense.vendor;
+                      vendorPaymentIndex = 0;
+                    } else {
+                      vendorPaymentIndex++;
+                    }
+
+                    // Calculate cumulative paid amount up to and including this payment
+                    // Get all payments for this vendor sorted by date
+                    const vendorPayments = sortedExpenses
+                      .filter(e => e.vendor === expense.vendor)
+                      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+                    // Find the index of current expense in the sorted vendor payments
+                    const currentPaymentIndex = vendorPayments.findIndex(e => e.id === expense.id);
+
+                    // Sum all payments up to and including current payment
+                    const cumulativePaid = vendorPayments
+                      .slice(0, currentPaymentIndex + 1)
+                      .reduce((sum, e) => sum + e.amount, 0);
+
+                    const remaining = Math.max(0, vendorContract - cumulativePaid);
+
+                    const isEditing = editingExpenseId === expense.id;
+
+                    return (
+                      <tr key={expense.id} className={`${index % 2 === 0 ? 'bg-pink-50' : 'bg-pink-100'} hover:bg-white/30 transition-colors`}>
+                        <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39]">{expense.vendorType}</td>
+                        <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39]">
+                          <div className={!isNewVendor ? 'pl-6 relative' : ''}>
+                            {!isNewVendor && <span className="absolute left-0 text-[#EC4899]/50">└─</span>}
+                            {vendor?.name || 'Unknown Vendor'}
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                value={editedExpense.notes}
+                                onChange={(e) => setEditedExpense(prev => ({ ...prev, notes: e.target.value }))}
+                                className="block w-full mt-1 text-xs p-1 border border-[#EC4899]/30 rounded focus:outline-none focus:ring-1 focus:ring-[#EC4899]"
+                                placeholder="Notes"
+                              />
+                            ) : (
+                              expense.notes && (
+                                <span className="block text-xs text-[#EC4899]/70 mt-1">{expense.notes}</span>
+                              )
+                            )}
+                          </div>
+                        </td>
                       <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39] text-right">
                         ₱{vendorContract.toLocaleString()}
                       </td>
                       <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39] text-right">
-                        ₱{expense.amount.toLocaleString()}
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            value={editedExpense.amount}
+                            onChange={(e) => setEditedExpense(prev => ({ ...prev, amount: e.target.value }))}
+                            className="w-full text-right p-1 border border-[#EC4899]/30 rounded focus:outline-none focus:ring-1 focus:ring-[#EC4899]"
+                            step="0.01"
+                          />
+                        ) : (
+                          `₱${expense.amount.toLocaleString()}`
+                        )}
                       </td>
                       <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-[#4a1d39] text-right">
                         ₱{remaining.toLocaleString()}
                       </td>
                       <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-center">
-                        <span className={`font-medium ${expense.paidBy === 'Andrea' ? 'text-[#b10057]' : 'text-[#9c27b0]'}`}>
-                          {expense.paidBy}
-                        </span>
+                        {isEditing ? (
+                          <select
+                            value={editedExpense.paidBy}
+                            onChange={(e) => setEditedExpense(prev => ({ ...prev, paidBy: e.target.value as 'Andrea' | 'Isaac' }))}
+                            className="w-full p-1 border border-[#EC4899]/30 rounded focus:outline-none focus:ring-1 focus:ring-[#EC4899]"
+                          >
+                            <option value="Andrea">Andrea</option>
+                            <option value="Isaac">Isaac</option>
+                          </select>
+                        ) : (
+                          <span className={`font-medium ${expense.paidBy === 'Andrea' ? 'text-[#b10057]' : 'text-[#9c27b0]'}`}>
+                            {expense.paidBy}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-center text-[#4a1d39]">
+                        {isEditing ? (
+                          <input
+                            type="date"
+                            value={editedExpense.date}
+                            onChange={(e) => setEditedExpense(prev => ({ ...prev, date: e.target.value }))}
+                            className="w-full p-1 border border-[#EC4899]/30 rounded focus:outline-none focus:ring-1 focus:ring-[#EC4899]"
+                          />
+                        ) : (
+                          new Date(expense.date).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })
+                        )}
                       </td>
                       <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-center">
-                        <button
-                          onClick={() => handleDeleteExpense(expense.id)}
-                          className="text-[#EC4899] hover:text-pink-700 transition-colors"
-                        >
-                          Delete
-                        </button>
+                        <div className="flex items-center justify-center gap-2">
+                          {isEditing ? (
+                            <button
+                              onClick={() => handleSaveExpense(expense.id)}
+                              className="text-green-600 hover:text-green-700 transition-colors p-1"
+                              title="Save"
+                            >
+                              <FaSave size={16} />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleEditExpense(expense)}
+                              className="text-[#EC4899] hover:text-pink-700 transition-colors p-1"
+                              title="Edit"
+                            >
+                              <FaPencilAlt size={16} />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDeleteExpense(expense.id)}
+                            className="text-red-500 hover:text-red-700 transition-colors p-1"
+                            title="Delete"
+                          >
+                            <FaTrash size={16} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
-                })}
+                });
+              })()}
               </tbody>
             </table>
           </div>
