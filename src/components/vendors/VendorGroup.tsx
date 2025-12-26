@@ -92,76 +92,82 @@ export default function VendorGroup({ group, selectedVendors }: VendorGroupProps
       </div>
 
       <div
-        className={`transition-all duration-300 ease-in-out ${isCollapsed ? 'max-h-0 overflow-hidden' : 'max-h-[9999px] overflow-y-auto'}`}
+        className={`transition-all duration-300 ease-in-out ${isCollapsed ? 'max-h-0 overflow-hidden' : 'max-h-[9999px]'}`}
       >
         <div className="bg-[#ffe5ec]/90 rounded-b-2xl shadow-[0_10px_25px_rgba(236,72,153,0.3)] p-4 sm:p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {group.vendors.map(vendor => {
-          const { percentage, color, totalPaid } = getVendorProgress(vendor);
-          const isSelected = selectedVendors[group.serviceType]?.includes(vendor.id) || false;
-          
-          return (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-fr">
+            {group.vendors.map(vendor => {
+              const { percentage, color, totalPaid } = getVendorProgress(vendor);
+              const isSelected = selectedVendors[group.serviceType]?.includes(vendor.id) || false;
+
+              return (
                 <div
                   key={vendor.id}
-                  className="card relative w-full sm:w-[300px] md:w-[320px] lg:w-[350px] min-h-[500px] flex flex-col justify-between transition-all duration-300 rounded-bl-xl rounded-tr-3xl shadow-[0px_15px_20px_-5px_rgba(0,0,0,0.5)]"
-                  style={{ transform: 'scale(1)' }}
-                  onMouseOver={e => e.currentTarget.style.transform = 'scale(1.03)'}
-                  onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+                  className="card relative w-full h-full flex flex-col justify-between transition-all duration-200 rounded-lg shadow-lg hover:shadow-xl bg-white overflow-hidden"
                 >
-                <button
-                  onClick={() => handleVendorSelect(vendor)}
-                  disabled={isSelecting}
-                    className={`absolute top-2 right-2 text-xs px-3 py-1 rounded-full shadow transition z-10 ${isSelecting ? 'opacity-50 cursor-not-allowed' : ''} ${isSelected ? 'bg-green-200 text-green-800' : 'bg-pink-100 text-pink-700 hover:bg-pink-200'}`}
+                  <button
+                    onClick={() => handleVendorSelect(vendor)}
+                    disabled={isSelecting}
+                    className={`absolute top-2 right-2 text-xs px-2 py-1 rounded-full shadow-md transition z-10 ${isSelecting ? 'opacity-50 cursor-not-allowed' : ''} ${isSelected ? 'bg-green-200 text-green-800' : 'bg-pink-100 text-pink-700 hover:bg-pink-200'}`}
                   >
-                    {isSelected ? 'Selected' : 'Select Vendor'}
+                    {isSelected ? 'Selected' : 'Select'}
                   </button>
 
-                  <div className="relative rounded-bl-xl rounded-tr-3xl h-[180px] overflow-hidden">
-                    <div
-                      className="img bg-[#fcb6cc] w-full h-full transition-all duration-300"
-                      style={{ transform: 'scale(1)' }}
-                      onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'}
-                      onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-                    ></div>
-                    <div className="absolute top-0 left-0 w-full px-4 pt-4 pb-3 z-[5] pr-20">
-                      <div className="text-[#b10057] font-bold text-base sm:text-lg break-words">
+                  <div className="relative h-24 overflow-hidden bg-gradient-to-br from-[#fcb6cc] to-[#f48fb1]">
+                    <div className="absolute top-0 left-0 w-full px-3 pt-3 pb-2 z-[5] pr-16">
+                      <div className="text-white font-bold text-sm line-clamp-1">
                         {vendor.name}
                       </div>
                       {vendor.packageName && (
-                        <div className="text-[#cc5b94] font-medium text-xs sm:text-sm mt-1 break-words">
+                        <div className="text-white/90 font-medium text-xs mt-0.5 line-clamp-1">
                           {vendor.packageName}
                         </div>
-                  )}
+                      )}
                     </div>
-              </div>
-              
-                  <div className="description text-left p-4 w-full backdrop-filter backdrop-blur-sm bg-black bg-opacity-30 text-white transition-all duration-500 ease-in-out overflow-visible rounded-b-xl flex-1">
-                    <div className="text-xs sm:text-sm text-white whitespace-normal leading-tight break-words space-y-1">
-                      {vendor.email && <div>Email: {vendor.email}</div>}
-                      {vendor.contactNumber && <div>Contact: {vendor.contactNumber}</div>}
-                      {vendor.contractPrice > 0 && <div>Contract Price: ₱{vendor.contractPrice.toLocaleString()}</div>}
-                    </div>
-              </div>
+                  </div>
 
-                  <div className="space-y-2 mt-4 p-4">
-                    <div className="flex justify-between text-xs sm:text-sm text-[#4a1d39]">
-                  <span>Payment Progress</span>
-                  <span>{percentage.toFixed(1)}%</span>
+                  <div className="flex-1 p-3 bg-white">
+                    <div className="text-xs text-gray-700 space-y-1.5">
+                      {vendor.email && (
+                        <div className="flex items-start gap-1">
+                          <span className="font-semibold text-[#EC4899] min-w-fit">Email:</span>
+                          <span className="truncate">{vendor.email}</span>
+                        </div>
+                      )}
+                      {vendor.contactNumber && (
+                        <div className="flex items-start gap-1">
+                          <span className="font-semibold text-[#EC4899] min-w-fit">Contact:</span>
+                          <span className="truncate">{vendor.contactNumber}</span>
+                        </div>
+                      )}
+                      {vendor.contractPrice > 0 && (
+                        <div className="flex items-start gap-1">
+                          <span className="font-semibold text-[#EC4899] min-w-fit">Price:</span>
+                          <span className="truncate">₱{vendor.contractPrice.toLocaleString()}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 p-3 bg-gray-50 border-t border-gray-200">
+                    <div className="flex justify-between text-xs text-gray-700">
+                      <span className="font-semibold">Payment Progress</span>
+                      <span className="font-bold text-[#EC4899]">{percentage.toFixed(1)}%</span>
+                    </div>
+                    <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${color} transition-all duration-300`}
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-600">
+                      <span>Paid: ₱{totalPaid.toLocaleString()}</span>
+                      <span>Left: ₱{(vendor.contractPrice - totalPaid).toLocaleString()}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${color} transition-all duration-300`}
-                    style={{ width: `${percentage}%` }}
-                  />
-                </div>
-                    <div className="flex justify-between text-xs sm:text-sm text-[#4a1d39]">
-                  <span>Paid: ₱{totalPaid.toLocaleString()}</span>
-                  <span>Left: ₱{(vendor.contractPrice - totalPaid).toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+              );
+            })}
           </div>
         </div>
       </div>
