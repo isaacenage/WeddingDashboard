@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { getVendors, getSelectedVendors, getServiceTypes, addVendor, updateVendor, deleteVendor, migrateVendorKeys } from '@/lib/firebase/vendors';
+import { getVendors, getSelectedVendors, getServiceTypes, addVendor, updateVendor, deleteVendor, migrateVendorKeys, cleanupSelectedVendors } from '@/lib/firebase/vendors';
 import { Vendor, VendorFormData } from '@/types/vendor';
 import VendorGroup from '@/components/vendors/VendorGroup';
 import VendorSummary from '@/components/vendors/VendorSummary';
@@ -81,6 +81,30 @@ export default function VendorsPage() {
       unsubscribeServiceTypes();
     };
   }, [user?.uid]);
+
+  // Clean up selectedVendors to remove any vendor IDs that no longer exist
+  useEffect(() => {
+    if (!user?.uid || !vendors.length || Object.keys(selectedVendors).length === 0) return;
+
+    const validVendorIds = new Set(vendors.map(v => v.id));
+
+    // Check if there are any invalid vendor IDs
+    const hasInvalidIds = Object.values(selectedVendors).some(vendorIds =>
+      vendorIds.some(id => !validVendorIds.has(id))
+    );
+
+    if (hasInvalidIds) {
+      // Clean up the Firebase database immediately
+      console.log('Found orphaned vendor IDs, cleaning up...');
+      cleanupSelectedVendors(user.uid, validVendorIds)
+        .then(() => {
+          console.log('Cleanup completed successfully');
+        })
+        .catch(error => {
+          console.error('Error cleaning up selected vendors:', error);
+        });
+    }
+  }, [user?.uid, vendors, selectedVendors]);
 
 
   const handleAddVendor = async (e: React.FormEvent) => {
@@ -240,17 +264,43 @@ export default function VendorsPage() {
     }));
   };
 
+  const handleCleanup = async () => {
+    if (!user?.uid) return;
+
+    try {
+      const validVendorIds = new Set(vendors.map(v => v.id));
+      await cleanupSelectedVendors(user.uid, validVendorIds);
+
+      // Show success message
+      const message = document.createElement('div');
+      message.className = 'text-green-600 text-sm bg-green-50 p-2 rounded-lg mb-4';
+      message.textContent = 'Cleanup completed: Orphaned vendor selections removed';
+      const container = document.querySelector('.bg-[#ffd5e0]/90');
+      container?.insertBefore(message, container.firstChild);
+      setTimeout(() => message.remove(), 3000);
+    } catch (error) {
+      console.error('Cleanup failed:', error);
+      // Show error message
+      const message = document.createElement('div');
+      message.className = 'text-red-600 text-sm bg-red-50 p-2 rounded-lg mb-4';
+      message.textContent = 'Failed to cleanup. Please try again.';
+      const container = document.querySelector('.bg-[#ffd5e0]/90');
+      container?.insertBefore(message, container.firstChild);
+      setTimeout(() => message.remove(), 3000);
+    }
+  };
+
   const handleMigration = async () => {
     if (!user?.uid || isMigrating) return;
-    
+
     try {
       setIsMigrating(true);
       const stats = await migrateVendorKeys(user.uid);
-      
+
       // Show success message with stats
       const message = document.createElement('div');
       message.className = 'text-green-600 text-sm bg-green-50 p-2 rounded-lg mb-4';
-      message.textContent = stats 
+      message.textContent = stats
         ? `Migration completed: ${stats.migrated} vendors migrated, ${stats.skipped} skipped, ${stats.errors} errors`
         : 'Migration completed: No vendors needed migration';
       const container = document.querySelector('.bg-[#ffd5e0]/90');
@@ -288,6 +338,12 @@ export default function VendorsPage() {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg sm:text-xl font-semibold text-[#EC4899]">Vendor Masterlist</h2>
               <div className="flex items-center gap-2">
+                <button
+                  onClick={handleCleanup}
+                  className="text-[#EC4899] hover:text-pink-700 text-sm"
+                >
+                  Clean Up
+                </button>
                 <button
                   onClick={handleMigration}
                   disabled={isMigrating}

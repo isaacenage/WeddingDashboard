@@ -191,6 +191,55 @@ export const unselectVendor = async (uid: string, serviceType: string, vendorId?
   }
 };
 
+// Clean up orphaned vendor IDs from selectedVendors
+export const cleanupSelectedVendors = async (uid: string, validVendorIds: Set<string>) => {
+  const selectedVendorsRef = ref(db, `selectedVendors/${uid}`);
+
+  try {
+    const snapshot = await get(selectedVendorsRef);
+    const data = snapshot.val();
+
+    if (!data) return;
+
+    let hasChanges = false;
+    const updates: Record<string, any> = {};
+
+    // Process each service type
+    Object.entries(data).forEach(([sanitizedType, value]) => {
+      let vendorIds: string[];
+
+      // Handle both old (string) and new (array) formats
+      if (typeof value === 'string') {
+        vendorIds = [value];
+      } else if (Array.isArray(value)) {
+        vendorIds = value;
+      } else {
+        vendorIds = [];
+      }
+
+      // Filter out vendor IDs that don't exist
+      const validIds = vendorIds.filter(id => validVendorIds.has(id));
+
+      if (validIds.length !== vendorIds.length) {
+        hasChanges = true;
+        if (validIds.length === 0) {
+          // Remove the entire service type if no valid vendors
+          updates[sanitizedType] = null;
+        } else {
+          updates[sanitizedType] = validIds;
+        }
+      }
+    });
+
+    if (hasChanges) {
+      await update(selectedVendorsRef, updates);
+    }
+  } catch (error) {
+    console.error('Failed to cleanup selected vendors:', error);
+    throw new Error('Failed to cleanup selected vendors');
+  }
+};
+
 // Migration function to convert push-generated keys to timestamp-based keys
 export const migrateVendorKeys = async (uid: string) => {
   const vendorsRef = ref(db, `vendors/${uid}`);

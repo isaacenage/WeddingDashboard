@@ -20,6 +20,12 @@ export default function VendorGroup({ group, selectedVendors }: VendorGroupProps
   const [isSelecting, setIsSelecting] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
 
+  // Get valid vendor IDs only (filter out orphaned IDs)
+  const validVendorIds = group.vendors.map(v => v.id);
+  const validSelectedVendorIds = selectedVendors[group.serviceType]?.filter(id =>
+    validVendorIds.includes(id)
+  ) || [];
+
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -74,9 +80,9 @@ export default function VendorGroup({ group, selectedVendors }: VendorGroupProps
       >
         <div className="flex items-center gap-2">
           <h3 className="text-lg sm:text-xl font-semibold text-[#4a1d39]">{group.serviceType}</h3>
-          {selectedVendors[group.serviceType]?.length > 0 && (
+          {validSelectedVendorIds.length > 0 && (
             <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-              {selectedVendors[group.serviceType].length} selected
+              {validSelectedVendorIds.length} selected
             </span>
           )}
         </div>
@@ -98,7 +104,7 @@ export default function VendorGroup({ group, selectedVendors }: VendorGroupProps
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-fr">
             {group.vendors.map(vendor => {
               const { percentage, color, totalPaid } = getVendorProgress(vendor);
-              const isSelected = selectedVendors[group.serviceType]?.includes(vendor.id) || false;
+              const isSelected = validSelectedVendorIds.includes(vendor.id);
 
               return (
                 <div
