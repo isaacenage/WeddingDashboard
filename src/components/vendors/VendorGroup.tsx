@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Vendor } from '@/types/vendor';
-import { selectVendor, unselectVendor } from '@/lib/firebase/vendors';
+import { selectVendor } from '@/lib/firebase/vendors';
 import { getBudgetExpenses, BudgetExpense } from '@/lib/firebase/budget';
 
 interface VendorGroupProps {
@@ -12,10 +12,9 @@ interface VendorGroupProps {
     vendors: Vendor[];
   };
   selectedVendors: Record<string, string[]>;
-  onVendorSelect: (serviceType: string, vendorId: string) => void;
 }
 
-export default function VendorGroup({ group, selectedVendors, onVendorSelect }: VendorGroupProps) {
+export default function VendorGroup({ group, selectedVendors }: VendorGroupProps) {
   const { user } = useAuth();
   const [expenses, setExpenses] = useState<BudgetExpense[]>([]);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -55,11 +54,11 @@ export default function VendorGroup({ group, selectedVendors, onVendorSelect }: 
 
   const handleVendorSelect = async (vendor: Vendor) => {
     if (!user?.uid || isSelecting) return;
-    
+
     try {
       setIsSelecting(true);
+      // Save to Firebase - the listener will update local state automatically
       await selectVendor(user.uid, group.serviceType, vendor.id);
-      onVendorSelect(group.serviceType, vendor.id);
     } catch (error) {
       console.error('Error selecting vendor:', error);
     } finally {

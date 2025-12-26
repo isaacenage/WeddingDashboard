@@ -82,31 +82,6 @@ export default function VendorsPage() {
     };
   }, [user?.uid]);
 
-  const handleVendorSelect = (serviceType: string, vendorId: string) => {
-    setSelectedVendors(prev => {
-      const currentVendors = prev[serviceType] || [];
-      const isSelected = currentVendors.includes(vendorId);
-      
-      if (isSelected) {
-        // Remove vendor from selection
-        const newVendors = currentVendors.filter(id => id !== vendorId);
-        if (newVendors.length === 0) {
-          const { [serviceType]: _, ...rest } = prev;
-          return rest;
-        }
-        return {
-          ...prev,
-          [serviceType]: newVendors
-        };
-      } else {
-        // Add vendor to selection
-        return {
-          ...prev,
-          [serviceType]: [...currentVendors, vendorId]
-        };
-      }
-    });
-  };
 
   const handleAddVendor = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -636,7 +611,6 @@ export default function VendorsPage() {
               key={group.serviceType}
               group={group}
               selectedVendors={selectedVendors}
-              onVendorSelect={handleVendorSelect}
             />
           ))}
         </div>
